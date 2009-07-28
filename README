@@ -4,7 +4,7 @@ Allows amount value in german or us format like 1.234,56 or 1,234.56.
 
 Only tested for Rails 2.3. Drop me a line if you need it for an older Rails version.
 
-= Installation
+== Installation
 
 As Gem:
 
@@ -12,9 +12,9 @@ As Gem:
 
 As plugin:
 
-  $ script/plugin install amount_field
+  $ script/plugin install git@github.com:thomasbaustert/amount_field.git
 
-= Example
+== Example
 
 First use the helper <tt>amount_field</tt> or <tt>amount_field_tag</tt> instead of
 the <tt>text_field</tt> helper:
@@ -41,7 +41,7 @@ Note! Make sure you always call <tt>validates_amount_format_of</tt> *before* eve
 other validation macro for the same attribute (e.g. before <tt>validates_numericality_of</tt>
 and <tt>validates_presence_of</tt> for <tt>price</tt>).
 
-= Configuration
+== Configuration
 
 Definition:
   
@@ -99,7 +99,7 @@ Explicit precision can be defined too:
 
 More configuration see section "Details".
 
-= I18N
+== I18N
 
 By default the german and english messages from <tt>amount_field/locale/(en|de).yml</tt> are used.
 You can define your own by adding your Yaml file to the load path like:
@@ -112,7 +112,7 @@ Or setup your own I18n backend.
 The placeholder <tt>{{value}}</tt> is substituted with the given value (e.g. "1.x" and 
 <tt>{{format_example}}</tt> with a valid example of the currently accepted format (e.g. 'd.ddd,dd').
 
-= Details (How does it work?)
+== Details (How does it work?)
 
 Basically the helper <tt>amount_field</tt> defines a input field like so:
 
@@ -146,12 +146,12 @@ That  will create the html:
 
 and the appropriate method <tt>my_prefix_price=(value)</tt>.
 
-= Running Tests
+== Running Tests
 
 You need a database <tt>gem_amount_field_test</tt> to run all tests.
 See test_helper.rb for details.
 
-= Contact
+== Contact
 
 For comments and question feel free to contact me: business@thomasbaustert.de
 
