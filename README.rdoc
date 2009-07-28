@@ -109,7 +109,7 @@ You can define your own by adding your Yaml file to the load path like:
 
 Or setup your own I18n backend.
 
-The placeholder <tt>{{value}}</tt> is substituted with the given value (e.g. "1.x" and 
+The placeholder <tt>{{value}}</tt> is substituted with the given value (e.g. "1.x") and 
 <tt>{{format_example}}</tt> with a valid example of the currently accepted format (e.g. 'd.ddd,dd').
 
 == Details (How does it work?)
@@ -121,12 +121,15 @@ Basically the helper <tt>amount_field</tt> defines a input field like so:
 The validation macro <tt>validates_amount_format_of</tt> defines a special setter method
 <tt>amount_field_price=(value)</tt> that accept the value. After validation and converting
 (e.g. "1.234,56" to 1234.56) the value is assigned to the original attribute <tt>price</tt>
-and maybe validate with the other validation macros.
+and maybe validate using other validation macros. That why it is currently important to
+call <tt>validates_amount_format_of</tt> before every other macro.
   
-The <tt>amount_field</tt> helper also formats the value with <tt>number_with_precision</tt>.
-You can explicitly set the value too:
+The <tt>amount_field</tt> helper formats the value with <tt>number_with_precision</tt> by
+default. You can explicitly set the value too:
     
     amount_field(:price, :value => ...)
+
+== More Configuration
   
 By default the input field contains the CSS class <tt>amount_field</tt> so you can define
 a CSS layout for every amount field like:
