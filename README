@@ -1,0 +1,159 @@
+= AmountField
+
+Allows amount value in german or us format like 1.234,56 or 1,234.56.
+
+Only tested for Rails 2.3. Drop me a line if you need it for an older Rails version.
+
+= Installation
+
+As Gem:
+
+  $ sudo gem install amount_field
+
+As plugin:
+
+  $ script/plugin install amount_field
+
+= Example
+
+First use the helper <tt>amount_field</tt> or <tt>amount_field_tag</tt> instead of
+the <tt>text_field</tt> helper:
+
+  <% form_for(@product) do |f| %>
+    <%= f.amount_field :price %>
+     ...    
+  <% end %>
+
+  <% form_tag(:action => "create", {}) do -%> 
+    <%= amount_field_tag :product, :price %>
+  ...  
+
+Second use the validation macro <tt>validates_amount_format_of</tt> in your model:
+
+  class Product < ActiveRecord::Base
+    validates_amount_format_of :price
+    validates_numericality_of :price
+    validates_presence_of :price
+    ...
+  end
+  
+Note! Make sure you always call <tt>validates_amount_format_of</tt> *before* every 
+other validation macro for the same attribute (e.g. before <tt>validates_numericality_of</tt>
+and <tt>validates_presence_of</tt> for <tt>price</tt>).
+
+= Configuration
+
+Definition:
+  
+  Delimiter = thousand separator
+  Separator = separator of value and decimal places
+  Precision = number of decimal places
+
+The default format configuration defines the german format and is a hash 
+containing the following pairs:
+
+  { :precision => 2, :delimiter => '.', :separator => ',' }
+  
+You can define your own default configuration via:
+
+  # environment.rb
+  AmountField::ActiveRecord::Validations.configuration = 
+    { :precision => 1, :delimiter => ',', :separator => '.' }
+
+Or use the constants
+  
+  AmountField::ActiveRecord::Validations.configuration = 
+    #AmountField::ActiveRecord::Validations::DEFAULT_CONFIGURATION_DE
+    AmountField::ActiveRecord::Validations::DEFAULT_CONFIGURATION_US
+
+You might switch the configuration at runtime depending on the current locale 
+via a before filter:
+
+  def set_amount_field_format
+    if I18n.locale == 'us'
+      AmountField::ActiveRecord::Validations.configuration = ...DEFAULT_CONFIGURATION_US
+    else
+      AmountField::ActiveRecord::Validations.configuration = ...DEFAULT_CONFIGURATION_DE
+    end  
+  end
+
+An explicitly defined format will overwrite the default configuration for that attribute:
+  
+  validates_amount_format_of :price, :separator => '.', :delimiter => ','
+  # VALID: "1,234.56" (1234.56) INVALID: "1.234,56"
+
+Integer values with a thousand separator can be defined as follows:
+  
+  validates_amount_format_of :price, :precision => 0, :separator => nil
+  # VALID: "1.234" (1234.0) INVALID: "1.234,56"
+
+A value with no thousand separator and not decimal places can be defined as follows:
+
+  validates_amount_format_of :price, :delimiter => nil 
+  # VALID: "1234,56" (1234.56) INVALID: "1.234,56"
+
+Explicit precision can be defined too:
+  
+  validates_amount_format_of :price, :precision => 1
+  # VALID: "1.234,5" (1234.5) INVALID: "1.234,56"
+
+More configuration see section "Details".
+
+= I18N
+
+By default the german and english messages from <tt>amount_field/locale/(en|de).yml</tt> are used.
+You can define your own by adding your Yaml file to the load path like:
+
+  # environment.rb
+  I18n.load_path << "#{RAILS_ROOT}/locale/en.yml"
+
+Or setup your own I18n backend.
+
+The placeholder <tt>{{value}}</tt> is substituted with the given value (e.g. "1.x" and 
+<tt>{{format_example}}</tt> with a valid example of the currently accepted format (e.g. 'd.ddd,dd').
+
+= Details (How does it work?)
+
+Basically the helper <tt>amount_field</tt> defines a input field like so:
+
+  <input name="product[amount_field_price]" class=" amount_field"...
+  
+The validation macro <tt>validates_amount_format_of</tt> defines a special setter method
+<tt>amount_field_price=(value)</tt> that accept the value. After validation and converting
+(e.g. "1.234,56" to 1234.56) the value is assigned to the original attribute <tt>price</tt>
+and maybe validate with the other validation macros.
+  
+The <tt>amount_field</tt> helper also formats the value with <tt>number_with_precision</tt>.
+You can explicitly set the value too:
+    
+    amount_field(:price, :value => ...)
+  
+By default the input field contains the CSS class <tt>amount_field</tt> so you can define
+a CSS layout for every amount field like:
+
+  input.amount_field {
+    text-align:right;
+  }
+  
+The method prefix and the CSS class can be changed as follows:
+
+  AmountField::Configuration.prefix = "my_prefix"
+  AmountField::Configuration.css_class = "my_class"
+
+That  will create the html:
+
+  <input name="product[my_prefix_price]" class=" my_class"...
+
+and the appropriate method <tt>my_prefix_price=(value)</tt>.
+
+= Running Tests
+
+You need a database <tt>gem_amount_field_test</tt> to run all tests.
+See test_helper.rb for details.
+
+= Contact
+
+For comments and question feel free to contact me: business@thomasbaustert.de
+
+
+Copyright (c) 2009 [Thomas Baustert], released under the MIT license
