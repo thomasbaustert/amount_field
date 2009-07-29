@@ -97,6 +97,11 @@ Explicit precision can be defined too:
   validates_amount_format_of :price, :precision => 1
   # VALID: "1.234,5" (1234.5) INVALID: "1.234,56"
 
+Standard Rails options like <tt>:allow_blank</tt>, or <tt>:allow_nil</tt> are supported:
+
+  validates_amount_format_of :price, :allow_blank => true
+  # VALID: ""
+
 More configuration see section "Details".
 
 == I18N
