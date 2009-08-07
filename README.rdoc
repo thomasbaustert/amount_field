@@ -8,11 +8,12 @@ Only tested for Rails 2.3. Drop me a line if you need it for an older Rails vers
 
 As Gem:
 
-  $ sudo gem install amount_field
+  $ gem sources -a http://gems.github.com (you only have to do this once)
+  $ sudo gem install thomasbaustert-amount_field
 
 As plugin:
 
-  $ script/plugin install git@github.com:thomasbaustert/amount_field.git
+  $ script/plugin install git://github.com/thomasbaustert/amount_field.git
 
 == Example
 
