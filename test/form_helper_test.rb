@@ -68,6 +68,23 @@ class FormHelperTest < ActionView::TestCase
     assert_dom_equal expected, output_buffer
     AmountField::Configuration.css_class = 'amount_field'
   end
+
+  test "explicit format overwrite default configuration only for the amount field" do
+    form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      concat f.amount_field(:price, :format => { :delimiter => '@', :separator => '/', :precision => 3})
+    end
+
+    expected =
+      "<form action='http://www.example.com' method='post'>" +
+      "<input name='test_product[amount_field_price]' size='30' type='text'" +
+      " class=' amount_field'" +
+      " id='test_product_price' value='1@234/560' />" +
+      "</form>"
+
+    assert_dom_equal expected, output_buffer
+    assert_equal( { :delimiter => '.', :separator => ',', :precision => 2}, 
+                  AmountField::ActiveRecord::Validations.configuration)
+  end
   
   protected
   

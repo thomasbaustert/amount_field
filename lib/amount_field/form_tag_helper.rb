@@ -4,7 +4,7 @@ module ActionView #:nodoc:
       include ActionView::Helpers::NumberHelper
 
       def amount_field_tag(object, method, options = {})
-        format_options = AmountField::ActiveRecord::Validations.configuration
+        format_options = AmountField::ActiveRecord::Validations.configuration.dup
         format_options.merge!(options.delete(:format) || {})
   
         instance = instance_variable_get("@#{object}") if object.is_a?(Symbol)

@@ -32,5 +32,11 @@ class FormTagHelperTest < ActiveSupport::TestCase
     assert_match /class=" my_class"/, amount_field_tag(:test_product, :price)
     AmountField::Configuration.css_class = 'amount_field'
   end
+
+  test "explicit format overwrite default configuration only for the amount field" do
+    @test_product = TestProduct.new(:price => 1234.56)
+    assert_match /value="1@234#560"/, amount_field_tag(:test_product, :price, :format => { :delimiter => '@', :separator => '#', :precision => 3})
+    assert_equal( { :delimiter => '.', :separator => ',', :precision => 2}, AmountField::ActiveRecord::Validations.configuration)
+  end
   
 end
