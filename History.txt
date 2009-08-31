@@ -2,11 +2,11 @@
 
 * Fix "undefined method `to_f' for [...]:Array" by supported attribute of type float 
   (even if it is not a good idea to use float for amount because of rounding errors)
-* Default configuration uses I18n.t('number.format.delimiter') and I18n.t('number.format.separator')
-  for delimiter and separator now. This means the default configuration depends on I18n.locale
-  and is not the german format by default anymore.
-* The delimiter and separator is now optional, so "1.234,00", "1234,00" and "1234" are
-  all valid at the same time. 
+* Default configuration uses I18n.t('number.amount_field.format') from the plugin file
+  amount_field/locale/(en|de).yml. This means the default configuration depends on I18n.locale
+  and is not necessarily the german format by default anymore.
+* The delimiter, separator and precision are now optional, so "1.234,00", "1234,00" and "1234" are
+  all valid at the same time.
 
 == 1.0.2 2009-08-07
 

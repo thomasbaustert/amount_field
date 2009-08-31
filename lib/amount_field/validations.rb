@@ -21,26 +21,17 @@ module AmountField #:nodoc:
           validates_each(attr_names, configuration) do |record, attr_name, value|
             raw_value = record.send("#{attr_name}_before_type_cast") || value
 
-            # we have to read the configuration every time to get the current I18n value
-            format_configuration = { :precision => I18n.t('number.format.precision'), 
-                                     :delimiter => I18n.t('number.format.delimiter'), 
-                                     :separator => I18n.t('number.format.separator') }.dup
-            # update it with a maybe given default configuration                         
-            format_configuration.update(AmountField::ActiveRecord::Validations.configuration)
-            # update it with a maybe given explicit configuration via the macro                         
-            format_configuration.update(configuration)
-
             # in case there is no assignment via 'amount_field_XXX=' method, we don't need to validate.
             next unless raw_value.kind_of?(AssignedValue)
 
-            converted_value = raw_value.convert(format_configuration)
+            converted_value = raw_value.convert(format_configuration(configuration))
             original_value  = raw_value.original_value
 
             # in case nil or blank is allowed, we don't validate
             next if configuration[:allow_nil] and original_value.nil?
             next if configuration[:allow_blank] and original_value.blank?
 
-            if valid_format?(original_value, format_configuration)
+            if valid_format?(original_value, format_configuration(configuration))
               # assign converted value to attribute so other validations macro can work on it 
               # and the getter returns a value
               record.send("#{attr_name}=", converted_value)
@@ -48,7 +39,8 @@ module AmountField #:nodoc:
               # assign original value to attribute so other validations macro can work on it two.
               record.send("#{attr_name}=", original_value)
               record.errors.add(attr_name, :invalid_amount_format, :value => original_value, 
-                :default => configuration[:message], :format_example => valid_format_example(format_configuration))
+                :default => configuration[:message], 
+                :format_example => valid_format_example(format_configuration(configuration)))
             end  
 
           end
@@ -85,6 +77,15 @@ module AmountField #:nodoc:
             end
           end
           
+          # we have to read the configuration every time to get the current I18n value
+          def format_configuration(configuration)
+            format_options = I18n.t(:'number.amount_field.format', :raise => true) rescue {}
+            # update it with a maybe given default configuration                         
+            format_options = format_options.merge(AmountField::ActiveRecord::Validations.configuration)
+            # update it with a maybe given explicit configuration via the macro                         
+            format_options.update(configuration)
+          end
+
           def valid_format?(value, configuration)
             return false if !value.kind_of?(String) || value.blank?
             

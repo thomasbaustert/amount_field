@@ -37,6 +37,23 @@ class FormHelperTest < ActionView::TestCase
     end  
   end
 
+  test "amount_field form helper with locale en" do
+    with_locale('en') do
+      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+        concat f.amount_field(:price)
+      end
+    
+      expected =
+        "<form action='http://www.example.com' method='post'>" +
+        "<input name='test_product[amount_field_price]' size='30' type='text'" +
+        " class=' #{AmountField::Configuration.css_class}'" +
+        " id='test_product_price' value='1,234.56' />" +
+        "</form>"
+
+      assert_dom_equal expected, output_buffer
+    end  
+  end
+
   test "configured prefix is use in amount_field" do
     with_locale('de') do
       AmountField::Configuration.prefix = 'my_prefix'
@@ -72,6 +89,23 @@ class FormHelperTest < ActionView::TestCase
 
       assert_dom_equal expected, output_buffer
       AmountField::Configuration.css_class = 'amount_field'
+    end  
+  end
+
+  test "default configuration format overwrite I18n configuration" do
+    with_configuration({ :delimiter => '@', :separator => '/', :precision => 2}) do
+      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+        concat f.amount_field(:price)
+      end
+
+      expected =
+        "<form action='http://www.example.com' method='post'>" +
+        "<input name='test_product[amount_field_price]' size='30' type='text'" +
+        " class=' amount_field'" +
+        " id='test_product_price' value='1@234/56' />" +
+        "</form>"
+
+      assert_dom_equal expected, output_buffer
     end  
   end
 

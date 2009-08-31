@@ -45,70 +45,85 @@ and <tt>validates_presence_of</tt> for <tt>price</tt>).
 
 == Configuration
 
+The following configuration is supported:
+
+=== Format Configuration
+
 Definition:
   
   Delimiter = thousand separator (e.g. '.' in 1.234.567)
   Separator = separator of value and decimal places (e.g. ',' in 12,56)
   Precision = number of decimal places
 
-The format configuration for all <tt>validates_amount_format_of</tt> is a hash with 
-the I18n values of Rails by default:
+The default format configuration is defined via Rails I18n and accessable through the key
+<tt>number.amount_field.format</tt> from the file <tt>amount_field/locale/(en|de).yml</tt>. 
 
-  { :precision => I18n.t('number.precision.format.precision'), 
-    :delimiter => I18n.t('number.precision.format.delimiter'), 
-    :separator => I18n.t('number.precision.format.separator') }
-
-While Rails provides the us format by default, the values for the german format (de) 
-are included in this gem. If you want the german format to be active, set the locale:
+Example:
 
   I18n.locale = :de
+  I18n.t('number.amount_field.format') # => { :precision => 2, :delimiter => '.', :separator => ',' }
 
-If you don't want to depend on I18n, you can define your own default configuration via:
+Currently only the locale <tt>de</tt> and<tt>en</tt> are supported.
 
-  # environment.rb
+If you want to define the default configuration independent from I18n, you can set it as follows:
+
   AmountField::ActiveRecord::Validations.configuration = 
     { :precision => 1, :delimiter => ',', :separator => '.' }
 
-And then might switch the configuration at runtime via a before filter:
-
-  def set_amount_field_format
-    if MyI18nLib.locale == :en
-      AmountField::ActiveRecord::Validations.configuration = {...en...}
-    else
-      AmountField::ActiveRecord::Validations.configuration = {...de...}
-    end  
-  end
-
 An explicitly defined format will overwrite the default configuration for that attribute:
   
-  validates_amount_format_of :price, :separator => '.', :delimiter => ','
-  # VALID: "1,234.56" (1234.56) INVALID: "1.234,56"
-
-Integer values with a thousand separator can be defined as follows:
-  
-  validates_amount_format_of :price, :precision => 0, :separator => nil
-  # VALID: "1.234" (1234.0) INVALID: "1.234,56"
-
-A value with no thousand separator and not decimal places can be defined as follows:
-
-  validates_amount_format_of :price, :delimiter => nil 
-  # VALID: "1234,56" (1234.56) INVALID: "1.234,56"
-
-Explicit precision can be defined too:
-  
-  validates_amount_format_of :price, :precision => 1
-  # VALID: "1.234,5" (1234.5) INVALID: "1.234,56"
+  validates_amount_format_of :price, :separator => '.', :delimiter => ',', :precision => 1
+  # VALID: "1,234.5" (1234.5)
 
 Standard Rails options like <tt>:allow_blank</tt>, or <tt>:allow_nil</tt> are supported:
 
   validates_amount_format_of :price, :allow_blank => true
-  # VALID: ""
 
-More configuration see section "Details".
+=== CSS class and prefix
+  
+By default the input field contains the CSS class <tt>amount_field</tt> so you can define
+a CSS layout for every amount field like:
+
+  input.amount_field {
+    text-align:right;
+  }
+  
+The method prefix and the CSS class can be changed as follows:
+
+  AmountField::Configuration.prefix = "my_prefix"
+  AmountField::Configuration.css_class = "my_class"
+
+That  will create the html:
+
+  <input name="product[my_prefix_price]" class=" my_class"...
+
+and the appropriate method <tt>my_prefix_price=(value)</tt>.
+
+== Input
+
+By default delimiter, separator and precision are optional, so "1.234,00", "1234,00" and "1234"
+are all valid for the german locale (de) at the same time.
+
+In all other cases the validation will fail and add an error message to the original 
+attribute (e.g. <tt>price</tt>). (See Error Messages)
+
+== Output
+
+The helper <tt>amount_field</tt> uses the Rails helper <tt>number_with_precision</tt> internally
+and passes the plugin format configuration as an argument. A value like 1234.56 is therefore
+displayed as "1.234,56" for the locale <tt>de</tt> and "1,234.56" for the locale <tt>en</tt>.
+
+You can explicitly set the format configuration with the option <tt>format</tt>:
+
+  amount_field(:price, :format => { :separator => '', ... })
+  
+And it is possible to pass the value explicitly:  
+  
+  amount_field(:price, :value => ...)
 
 == Error Messages
 
-By default the german and english messages are taken from the file (a simple I18n backend)
+By default the german and english messages are taken from the file 
 <tt>amount_field/locale/(en|de).yml</tt> through the key 
 <tt>activerecord.errors.messages.invalid_amount_format</tt>.
 
@@ -137,34 +152,9 @@ The validation macro <tt>validates_amount_format_of</tt> defines a special sette
 <tt>amount_field_price=(value)</tt> that accept the value. After successfully format 
 validation the original parameter is converted to a ruby value (e.g. "1.234,56" to 1234.56)
 and assigned to the original attribute <tt>price</tt>. Following validation macros work on
-the the converted value. That's why it is currently important to call
+the converted value. That's why it is currently important to call 
 <tt>validates_amount_format_of</tt> before every other macro.
   
-The <tt>amount_field</tt> helper formats the value with <tt>number_with_precision</tt> by
-default. You can explicitly set the value too:
-    
-    amount_field(:price, :value => ...)
-
-== More Configuration
-  
-By default the input field contains the CSS class <tt>amount_field</tt> so you can define
-a CSS layout for every amount field like:
-
-  input.amount_field {
-    text-align:right;
-  }
-  
-The method prefix and the CSS class can be changed as follows:
-
-  AmountField::Configuration.prefix = "my_prefix"
-  AmountField::Configuration.css_class = "my_class"
-
-That  will create the html:
-
-  <input name="product[my_prefix_price]" class=" my_class"...
-
-and the appropriate method <tt>my_prefix_price=(value)</tt>.
-
 == Running Tests
 
 You need a database <tt>gem_amount_field_test</tt> to run all tests.
@@ -172,11 +162,13 @@ See test_helper.rb for details.
 
 == Credits
 
-* Michael Schiller (for feedback and tipps)
+* Michael Schiller (for feedback and ideas)
  
 == Contact
 
 For comments and question feel free to contact me: business@thomasbaustert.de
 
+If you are using the plugin, consider recommending me at workingwithrails.com:
+http://workingwithrails.com/person/6131-thomas-baustert
 
 Copyright (c) 2009 [Thomas Baustert], released under the MIT license

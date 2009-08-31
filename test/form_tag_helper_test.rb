@@ -19,7 +19,7 @@ class FormTagHelperTest < ActiveSupport::TestCase
   test "return an value attribute with a formatted value for english locale" do
     with_locale('en') do
       @test_product = TestProduct.new(:price => 1234.56)
-      assert_match /value="1234.560"/, amount_field_tag(:test_product, :price)
+      assert_match /value="1,234.56"/, amount_field_tag(:test_product, :price)
     end
   end
 

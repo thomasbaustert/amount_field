@@ -5,7 +5,8 @@ module AmountField #:nodoc:
       include ActionView::Helpers::NumberHelper
 
       def amount_field(method, options = {})
-        format_options = AmountField::ActiveRecord::Validations.configuration.dup
+        format_options = I18n.t(:'number.amount_field.format', :raise => true) rescue {}
+        format_options = format_options.merge(AmountField::ActiveRecord::Validations.configuration)
         format_options.merge!(options.delete(:format) || {})
     
         # if no explicit value is given, we set a formatted one. In case of an error we take the
