@@ -9,9 +9,18 @@ class FormTagHelperTest < ActiveSupport::TestCase
     assert_match /name="test_product\[amount_field_price\]"/, amount_field_tag(:test_product, :price)
   end
 
-  test "return an value attribute with a formatted value" do
-    @test_product = TestProduct.new(:price => 1234.56)
-    assert_match /value="1.234,56"/, amount_field_tag(:test_product, :price)
+  test "return an value attribute with a formatted value for german locale" do
+    with_locale('de') do
+      @test_product = TestProduct.new(:price => 1234.56)
+      assert_match /value="1.234,56"/, amount_field_tag(:test_product, :price)
+    end
+  end
+
+  test "return an value attribute with a formatted value for english locale" do
+    with_locale('en') do
+      @test_product = TestProduct.new(:price => 1234.56)
+      assert_match /value="1234.560"/, amount_field_tag(:test_product, :price)
+    end
   end
 
   test "default css class is used in combination with given class" do
@@ -33,10 +42,10 @@ class FormTagHelperTest < ActiveSupport::TestCase
     AmountField::Configuration.css_class = 'amount_field'
   end
 
-  test "explicit format overwrite default configuration only for the amount field" do
+  test "explicit format overwrite default configuration" do
     @test_product = TestProduct.new(:price => 1234.56)
     assert_match /value="1@234#560"/, amount_field_tag(:test_product, :price, :format => { :delimiter => '@', :separator => '#', :precision => 3})
-    assert_equal( { :delimiter => '.', :separator => ',', :precision => 2}, AmountField::ActiveRecord::Validations.configuration)
+    assert_equal({}, AmountField::ActiveRecord::Validations.configuration)
   end
   
 end

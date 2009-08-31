@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.column "name", :string
     t.column "price", :decimal, :precision => 12, :scale => 2
     t.column "stock_price", :decimal, :precision => 12, :scale => 2
+    t.column "float_price", :float
   end
 end
 
@@ -58,7 +59,7 @@ class ActiveSupport::TestCase
   end
 
   def assert_valid_formats(formats, test_clazz)
-    formats.each do |format, expected_value| 
+    formats.each do |format, expected_value|
       product = test_clazz.new(:amount_field_price => format)
       assert product.valid?, "expected '#{format}' to be valid (#{product.errors.full_messages.inspect})"
       assert_in_delta expected_value, product.price.to_f, 0.001

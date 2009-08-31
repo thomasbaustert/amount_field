@@ -2,7 +2,8 @@
 
 Allows amount value in german or us format like 1.234,56 or 1,234.56.
 
-Only tested for Rails 2.3. Drop me a line if you need it for an older Rails version.
+Only tested for Rails 2.3. It may works with older versions but I haven't tested it.
+Drop me a line if you encounter problems.
 
 == Installation
 
@@ -46,35 +47,35 @@ and <tt>validates_presence_of</tt> for <tt>price</tt>).
 
 Definition:
   
-  Delimiter = thousand separator
-  Separator = separator of value and decimal places
+  Delimiter = thousand separator (e.g. '.' in 1.234.567)
+  Separator = separator of value and decimal places (e.g. ',' in 12,56)
   Precision = number of decimal places
 
-The default format configuration defines the german format and is a hash 
-containing the following pairs:
+The format configuration for all <tt>validates_amount_format_of</tt> is a hash with 
+the I18n values of Rails by default:
 
-  { :precision => 2, :delimiter => '.', :separator => ',' }
-  
-You can define your own default configuration via:
+  { :precision => I18n.t('number.precision.format.precision'), 
+    :delimiter => I18n.t('number.precision.format.delimiter'), 
+    :separator => I18n.t('number.precision.format.separator') }
+
+While Rails provides the us format by default, the values for the german format (de) 
+are included in this gem. If you want the german format to be active, set the locale:
+
+  I18n.locale = :de
+
+If you don't want to depend on I18n, you can define your own default configuration via:
 
   # environment.rb
   AmountField::ActiveRecord::Validations.configuration = 
     { :precision => 1, :delimiter => ',', :separator => '.' }
 
-Or use the constants
-  
-  AmountField::ActiveRecord::Validations.configuration = 
-    #AmountField::ActiveRecord::Validations::DEFAULT_CONFIGURATION_DE
-    AmountField::ActiveRecord::Validations::DEFAULT_CONFIGURATION_US
-
-You might switch the configuration at runtime depending on the current locale 
-via a before filter:
+And then might switch the configuration at runtime via a before filter:
 
   def set_amount_field_format
-    if I18n.locale == 'us'
-      AmountField::ActiveRecord::Validations.configuration = ...DEFAULT_CONFIGURATION_US
+    if MyI18nLib.locale == :en
+      AmountField::ActiveRecord::Validations.configuration = {...en...}
     else
-      AmountField::ActiveRecord::Validations.configuration = ...DEFAULT_CONFIGURATION_DE
+      AmountField::ActiveRecord::Validations.configuration = {...de...}
     end  
   end
 
@@ -105,30 +106,39 @@ Standard Rails options like <tt>:allow_blank</tt>, or <tt>:allow_nil</tt> are su
 
 More configuration see section "Details".
 
-== I18N
+== Error Messages
 
-By default the german and english messages from <tt>amount_field/locale/(en|de).yml</tt> are used.
+By default the german and english messages are taken from the file (a simple I18n backend)
+<tt>amount_field/locale/(en|de).yml</tt> through the key 
+<tt>activerecord.errors.messages.invalid_amount_format</tt>.
+
 You can define your own by adding your Yaml file to the load path like:
 
   # environment.rb
   I18n.load_path << "#{RAILS_ROOT}/locale/en.yml"
 
-Or setup your own I18n backend.
-
+  # "#{RAILS_ROOT}/locale/en.yml"
+  de:
+    activerecord:
+      errors:
+        messages:
+          invalid_amount_format: "bla ... '{{value}}' blub ...  ({{format_example}})"
+    
 The placeholder <tt>{{value}}</tt> is substituted with the given value (e.g. "1.x") and 
 <tt>{{format_example}}</tt> with a valid example of the currently accepted format (e.g. 'd.ddd,dd').
 
-== Details (How does it work?)
+== How does it work?
 
 Basically the helper <tt>amount_field</tt> defines a input field like so:
 
   <input name="product[amount_field_price]" class=" amount_field"...
   
 The validation macro <tt>validates_amount_format_of</tt> defines a special setter method
-<tt>amount_field_price=(value)</tt> that accept the value. After validation and converting
-(e.g. "1.234,56" to 1234.56) the value is assigned to the original attribute <tt>price</tt>
-and maybe validate using other validation macros. That why it is currently important to
-call <tt>validates_amount_format_of</tt> before every other macro.
+<tt>amount_field_price=(value)</tt> that accept the value. After successfully format 
+validation the original parameter is converted to a ruby value (e.g. "1.234,56" to 1234.56)
+and assigned to the original attribute <tt>price</tt>. Following validation macros work on
+the the converted value. That's why it is currently important to call
+<tt>validates_amount_format_of</tt> before every other macro.
   
 The <tt>amount_field</tt> helper formats the value with <tt>number_with_precision</tt> by
 default. You can explicitly set the value too:
@@ -160,6 +170,10 @@ and the appropriate method <tt>my_prefix_price=(value)</tt>.
 You need a database <tt>gem_amount_field_test</tt> to run all tests.
 See test_helper.rb for details.
 
+== Credits
+
+* Michael Schiller (for feedback and tipps)
+ 
 == Contact
 
 For comments and question feel free to contact me: business@thomasbaustert.de

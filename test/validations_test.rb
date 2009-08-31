@@ -30,10 +30,12 @@ class ValidationsTest < ActiveSupport::TestCase
   end
 
   test "special setter accept german format value" do
-    product = TestProduct.new
-    product.amount_field_price = '1.234,56'
-    assert product.valid?, "expect '1.234,56' to be valid (#{product.errors.full_messages.inspect})"
-    assert_in_delta 1234.56, product.price, 0.001
+    with_locale('de') do
+      product = TestProduct.new
+      product.amount_field_price = '1.234,56'
+      assert product.valid?, "expect '1.234,56' to be valid (#{product.errors.full_messages.inspect})"
+      assert_in_delta 1234.56, product.price, 0.001
+    end  
   end
 
   test "accept valid german formats" do
@@ -42,13 +44,15 @@ class ValidationsTest < ActiveSupport::TestCase
       validates_amount_format_of :price
     end
 
-    assert_valid_formats({',00' => 0.0, '1,00' => 1.0, '12,00' => 12.0, '123,00' => 123.0, '1234,00' => 1234.0, 
-                          '1.234,56' => 1234.56, '12.345,00' => 12345.0, '123.456,00' => 123456.0, 
-                          '1.234.567,00' => 1234567.00 }, TestProductValidGermanFormat)
+    with_locale('de') do
+      assert_valid_formats({',00' => 0.0, '1,00' => 1.0, '12,00' => 12.0, '123,00' => 123.0, '1234,00' => 1234.0, 
+                            '1.234,56' => 1234.56, '12.345,00' => 12345.0, '123.456,00' => 123456.0, 
+                            '1.234.567,00' => 1234567.00 }, TestProductValidGermanFormat)
+    end                        
   end
   
   test "accept valid us formats" do
-    with_configuration({ :separator => '.', :delimiter => ',' }) do
+    with_configuration({ :separator => '.', :delimiter => ',', :precision => 2 }) do
       class TestProductValidUsFormat < ActiveRecord::Base
         set_table_name 'test_products'
         validates_amount_format_of :price
@@ -66,8 +70,10 @@ class ValidationsTest < ActiveSupport::TestCase
       validates_amount_format_of :price
     end
 
-    assert_invalid_formats(['1234.567.890,12', '123.4567.890,12', '1,2.34', '1,2,3', '1.23,45', 
-                            '1.23.45,6', '2,1x', '2,x', 'x2', '', nil], TestProductInValidGermanFormat)
+    with_locale('de') do
+      assert_invalid_formats(['1234.567.890,12', '123.4567.890,12', '1,2.34', '1,2,3', '1.23,45', 
+                              '1.23.45,6', '2,1x', '2,x', 'x2', '', nil], TestProductInValidGermanFormat)
+    end                          
   end
 
   test "accept only values of format with the defined configuration" do
@@ -77,25 +83,25 @@ class ValidationsTest < ActiveSupport::TestCase
       validates_amount_format_of :stock_price, :separator => ',', :delimiter => '.'
     end
 
-    product = TestProductConfiguration.new(:amount_field_price => '1,234,567.89', 
-                                           :amount_field_stock_price => '1.234.567,89')
+    product = TestProductConfiguration.new(:amount_field_price => '1,234,567.891', 
+                                           :amount_field_stock_price => '1.234.567,892')
     assert product.valid?
-    assert_in_delta 1234567.89, product.price, 0.001
-    assert_in_delta 1234567.89, product.stock_price, 0.001
+    assert_in_delta 1234567.891, product.price, 0.001
+    assert_in_delta 1234567.892, product.stock_price, 0.001
   end
 
   test "accept only values of format with the defined precision" do
     class TestProductPrecision < ActiveRecord::Base
       set_table_name 'test_products'
-      validates_amount_format_of :price # default 2
+      validates_amount_format_of :price # default 3
       validates_amount_format_of :stock_price, :precision => 1
     end
 
-    product = TestProductPrecision.new(:amount_field_price => '1.234,56', 
-                                       :amount_field_stock_price => '1.234,5')
+    product = TestProductPrecision.new(:amount_field_price => '1,234.567', 
+                                       :amount_field_stock_price => '1,234.5')
     assert product.valid?
-    assert_in_delta 1234.56, product.price, 0.001
-    assert_in_delta 1234.5,  product.stock_price, 0.001
+    assert_in_delta 1234.567, product.price, 0.001
+    assert_in_delta 1234.500, product.stock_price, 0.001
   end
 
   test "accept only integer if precision is 0 or nil" do
@@ -104,8 +110,10 @@ class ValidationsTest < ActiveSupport::TestCase
       validates_amount_format_of :price, :precision => 0, :separator => nil
     end
 
-    assert_valid_formats({'0' => 0.0, '1' => 1.0, '12' => 12.0, '123' => 123.0, '1.234' => 1234.0}, TestProductInteger)
-    assert_invalid_formats(['1,', '1,0', '1,2', '1,23'], TestProductInteger)
+    with_locale('de') do
+      assert_valid_formats({'0' => 0.0, '1' => 1.0, '12' => 12.0, '123' => 123.0, '1.234' => 1234.0}, TestProductInteger)
+      assert_invalid_formats(['1,', '1,0', '1,2', '1,23'], TestProductInteger)
+    end  
   end
 
   test "accept only values with no delimiter" do
@@ -114,30 +122,32 @@ class ValidationsTest < ActiveSupport::TestCase
       validates_amount_format_of :price, :separator => '.', :delimiter => nil
     end
 
-    assert_valid_formats({'.00' => 0.0, '1.00' => 1.0, '12.00' => 12.0, '123.00' => 123.0, '1234.00' => 1234.0, '12345.00' => 12345.0, '123456.00' => 123456.0}, TestProductNoDelimiter)
-    assert_invalid_formats(['1,234.56', '123,456.00'], TestProductNoDelimiter)
+    with_locale('de') do
+      assert_valid_formats({'.00' => 0.0, '1.00' => 1.0, '12.00' => 12.0, '123.00' => 123.0, '1234.00' => 1234.0, '12345.00' => 12345.0, '123456.00' => 123456.0}, TestProductNoDelimiter)
+      assert_invalid_formats(['1,234.56', '123,456.00'], TestProductNoDelimiter)
+    end
   end
 
   test "use english default message" do
-    with_locale('en') do
-      class TestProductEnglishMessage < ActiveRecord::Base
-        set_table_name 'test_products'
-        validates_amount_format_of :price
-      end
+    class TestProductEnglishMessage < ActiveRecord::Base
+      set_table_name 'test_products'
+      validates_amount_format_of :price
+    end
 
+    with_locale('en') do
       product = TestProductEnglishMessage.new(:amount_field_price => 'x')
       assert !product.valid?
-      assert_equal "'x' is not a valid amount format (d.ddd,dd)", product.errors.on(:price)
+      assert_equal "'x' is not a valid amount format (d,ddd.ddd)", product.errors.on(:price)
     end  
   end
 
   test "use german default message" do
-    with_locale('de') do
-      class TestProductGermanMessage < ActiveRecord::Base
-        set_table_name 'test_products'
-        validates_amount_format_of :price
-      end
+    class TestProductGermanMessage < ActiveRecord::Base
+      set_table_name 'test_products'
+      validates_amount_format_of :price
+    end
 
+    with_locale('de') do
       product = TestProductGermanMessage.new(:amount_field_price => 'x')
       assert !product.valid?
       assert_equal "'x' ist ein ungültiges Format (d.ddd,dd)", product.errors.on(:price)
@@ -161,13 +171,15 @@ class ValidationsTest < ActiveSupport::TestCase
       validates_amount_format_of :price, :precision => 1
     end
 
-    [ ',0', '1,0', '1,0'].each do |value|
-      assert TestProductValidPrecision.new(:amount_field_price => value).valid?, "expected '#{value}' to be valid"
+    with_locale('de') do 
+      [ ',0', '1,0', '1,0'].each do |value|
+        assert TestProductValidPrecision.new(:amount_field_price => value).valid?, "expected '#{value}' to be valid"
+      end  
     end  
   end
   
   test "explicit definition overwrites default configuration" do
-    with_configuration(default = { :separator => '_', :delimiter => ';' }) do
+    with_configuration(default = { :separator => '_', :delimiter => ';', :precision => 2 }) do
       class TestProductOverwriteConfiguration < ActiveRecord::Base
         set_table_name 'test_products'
         validates_amount_format_of :price, :separator => '/', :delimiter => '@'
@@ -210,8 +222,8 @@ class ValidationsTest < ActiveSupport::TestCase
   end
   
   test "valid format example returns string depending on given configuration" do
-    assert_equal "d.ddd,dd", TestProduct.send(:valid_format_example, AmountField::ActiveRecord::Validations::DEFAULT_CONFIGURATION_DE)
-    assert_equal "d,ddd.dd", TestProduct.send(:valid_format_example, AmountField::ActiveRecord::Validations::DEFAULT_CONFIGURATION_US)
+    assert_equal "d.ddd,dd", TestProduct.send(:valid_format_example, { :precision => 2, :delimiter => '.', :separator => ',' })
+    assert_equal "d,ddd.dd", TestProduct.send(:valid_format_example, { :precision => 2, :delimiter => ',', :separator => '.' })
     assert_equal "dddd,dd", TestProduct.send(:valid_format_example, { :precision => 2, :delimiter => nil, :separator => ',' })
     assert_equal "dddd,d", TestProduct.send(:valid_format_example, { :precision => 1, :delimiter => nil, :separator => ',' })
     assert_equal "dddd", TestProduct.send(:valid_format_example, { :precision => nil, :delimiter => nil, :separator => nil })
@@ -237,6 +249,45 @@ class ValidationsTest < ActiveSupport::TestCase
     assert TestProductConfigPrefix.new.respond_to?('my_prefix_price=')
     AmountField::Configuration.prefix = 'amount_field'
   end
+  
+  test "works with float attribute" do
+    class TestProductFloatAttribute < ActiveRecord::Base
+      set_table_name 'test_products'
+      validates_amount_format_of :float_price
+    end
+    with_locale('de') do
+      assert TestProductFloatAttribute.new(:amount_field_float_price => '1.234,00').valid? 
+      assert TestProductFloatAttribute.new(:amount_field_float_price => '1234').valid? 
+    end  
+  end
+  
+  test "allow separator and delimiter to be optional for german format" do
+    class TestProductOptionalSeparatorAndDelimiterForGerman < ActiveRecord::Base
+      set_table_name 'test_products'
+      validates_amount_format_of :float_price
+    end
+    with_locale('de') do
+      ['1.234,00', '1234,00', '1.234', '1234'].each do |v|
+        p = TestProductOptionalSeparatorAndDelimiterForGerman.new(:amount_field_float_price => v)
+        assert p.valid?, p.errors.full_messages.inspect
+      end 
+    end  
+  end
+
+  test "allow separator and delimiter to be optional for us format" do
+    class TestProductOptionalSeparatorAndDelimiterForUs < ActiveRecord::Base
+      set_table_name 'test_products'
+      validates_amount_format_of :float_price
+    end
+    with_locale('en') do
+      ['1,234.000', '1234.000', '1,234', '1234'].each do |v|
+        p = TestProductOptionalSeparatorAndDelimiterForUs.new(:amount_field_float_price => v)
+        assert p.valid?, p.errors.full_messages.inspect
+      end 
+    end  
+  end
+
+  #TODO/2009-08-28/tb do we need :separator => nil, :delimiter => nil ... !?
   
 end
 
