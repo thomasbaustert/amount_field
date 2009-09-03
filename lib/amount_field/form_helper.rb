@@ -10,8 +10,13 @@ module AmountField #:nodoc:
         format_options.merge!(options.delete(:format) || {})
     
         # if no explicit value is given, we set a formatted one. In case of an error we take the
-        # XXX_before_typecast value provided by rails (the original value inserted by the user).
-        options[:value] ||= number_with_precision(object.send(method), format_options) unless object.errors.on(method)
+        # original value inserted by the user.
+        unless object.errors.on(method)
+          options[:value] ||= number_with_precision(object.send(method), format_options)
+        else
+          options[:value] ||= object.send("#{method}_before_type_cast").original_value
+        end
+
         options[:name]  = "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"
         options[:class] = "#{options[:class]} #{AmountField::Configuration.css_class}"
 

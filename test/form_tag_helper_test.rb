@@ -48,4 +48,16 @@ class FormTagHelperTest < ActiveSupport::TestCase
     assert_equal({}, AmountField::ActiveRecord::Validations.configuration)
   end
   
+  test "we show the original value for an invalid value" do
+    @test_product = TestProduct.new(:amount_field_price => "x")
+    @test_product.valid?
+    assert_match /value="x"/, amount_field_tag(:test_product, :price)
+  end
+
+  test "we show the given value instead of the invalid value" do
+    @test_product = TestProduct.new(:amount_field_price => "x")
+    @test_product.valid?
+    assert_match /value="42"/, amount_field_tag(:test_product, :price, :value => 42)
+  end
+  
 end

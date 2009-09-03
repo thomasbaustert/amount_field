@@ -8,10 +8,17 @@ module ActionView #:nodoc:
         format_options = format_options.merge(AmountField::ActiveRecord::Validations.configuration)
         format_options.merge!(options.delete(:format) || {})
   
-        instance = instance_variable_get("@#{object}") if object.is_a?(Symbol)
-        object_name = instance.class.name.underscore
+        object      = instance_variable_get("@#{object}") if object.is_a?(Symbol)
+        object_name = object.class.name.underscore
     
-        options[:value] ||= number_with_precision(instance.send(method), format_options)
+        # if no explicit value is given, we set a formatted one. In case of an error we take the
+        # original value inserted by the user.
+        unless object.errors.on(method)
+          options[:value] ||= number_with_precision(object.send(method), format_options)
+        else
+          options[:value] ||= object.send("#{method}_before_type_cast").original_value
+        end
+        
         options[:name]  = "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"
         options[:class] = "#{options[:class]} #{AmountField::Configuration.css_class}"
 

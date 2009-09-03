@@ -128,6 +128,40 @@ class FormHelperTest < ActionView::TestCase
     end                
   end
   
+  test "we show the original value for an invalid value" do
+    test_product = TestProduct.new(:amount_field_price => "x")
+    test_product.valid?
+    form_for(:test_product, test_product, :builder => MyFormBuilder) do |f|
+      concat f.amount_field(:price)
+    end
+
+    expected =
+      "<form action='http://www.example.com' method='post'>" + 
+      "<div class='fieldWithErrors'><input name='test_product[amount_field_price]' size='30'" + 
+      " class=' amount_field' type='text' id='test_product_price' value='x' /></div>" + 
+      "</form>"
+
+    assert_dom_equal expected, output_buffer
+    assert_equal({}, AmountField::ActiveRecord::Validations.configuration)
+  end
+  
+  test "we show the given value instead of the invalid value" do
+    test_product = TestProduct.new(:amount_field_price => "x")
+    test_product.valid?
+    form_for(:test_product, test_product, :builder => MyFormBuilder) do |f|
+      concat f.amount_field(:price, :value => 4711)
+    end
+
+    expected =
+      "<form action='http://www.example.com' method='post'>" + 
+      "<div class='fieldWithErrors'><input name='test_product[amount_field_price]' size='30'" + 
+      " class=' amount_field' type='text' id='test_product_price' value='4711' /></div>" + 
+      "</form>"
+
+    assert_dom_equal expected, output_buffer
+    assert_equal({}, AmountField::ActiveRecord::Validations.configuration)
+  end
+  
   protected
   
     def protect_against_forgery?

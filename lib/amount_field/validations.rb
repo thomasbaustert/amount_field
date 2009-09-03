@@ -36,8 +36,9 @@ module AmountField #:nodoc:
               # and the getter returns a value
               record.send("#{attr_name}=", converted_value)
             else  
-              # assign original value to attribute so other validations macro can work on it two.
-              record.send("#{attr_name}=", original_value)
+              # assign original value as AssignedValue so multiple calls of this validation will
+              # consider the value still as invalid.
+              record.send("#{attr_name}=", raw_value)
               record.errors.add(attr_name, :invalid_amount_format, :value => original_value, 
                 :default => configuration[:message], 
                 :format_example => valid_format_example(format_configuration(configuration)))
@@ -47,25 +48,6 @@ module AmountField #:nodoc:
         end
         
         private
-
-          # Stores the original assigned value and provide convertion depending on actual configuration.
-          class AssignedValue
-            attr_accessor :converted_value, :original_value
-
-            def initialize(original_value)
-              @original_value = original_value
-            end
-            
-            def convert(configuration)
-              @converted_value = original_value.to_s.gsub(configuration[:delimiter].to_s, '')
-              @converted_value = @converted_value.sub(configuration[:separator].to_s, '.') unless configuration[:separator].blank?
-              @converted_value
-            end
-
-            def to_f # needed for AR::type_cast
-              @original_value
-            end
-          end
 
           def define_special_setter(attr_names, configuration)
             attr_names.each do |attr_name| 
@@ -112,6 +94,39 @@ module AmountField #:nodoc:
           end
 
       end
+      
+      # Stores the original assigned value and provide convertion depending on actual configuration.
+      class AssignedValue #:nodoc:
+        attr_accessor :converted_value, :original_value
+
+        def initialize(original_value)
+          @original_value = original_value
+        end
+        
+        def convert(configuration)
+          @converted_value = original_value.to_s.gsub(configuration[:delimiter].to_s, '')
+          @converted_value = @converted_value.sub(configuration[:separator].to_s, '.') unless configuration[:separator].blank?
+          @converted_value
+        end
+
+        # In case of an error, xxx_before_type_cast returns an instance of this class and to_d
+        # is called on that during type_cast. So we need to define this method and we return 
+        # <tt>nil</tt> because the format is invalid and therefore there is no value.
+        # See ActiveRecord::ConnectionAdapters::Column#type_cast
+        def to_d
+          nil
+        end
+            
+        # In case the attribute is of type Float an the format validation fails, xxx_before_type_cast 
+        # returns an instance of this class and to_f is called on that during type_cast. So we need
+        # to define this method we return <tt>nil</tt> because the format is invalid and therefore 
+        # there is no value.
+        # See ActiveRecord::ConnectionAdapters::Column#type_cast
+        def to_f
+          nil
+        end
+      end
+      
     end
   end
 end

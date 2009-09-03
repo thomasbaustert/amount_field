@@ -21,12 +21,11 @@ class ValidationsTest < ActiveSupport::TestCase
   test "special setter does not accept a decimal value" do
     # special case. The value is assign via the special setter as a decimal not as a string.
     # The validation fails because the value is not of the german format '1234,56' and therefore
-    # the price should be 0.0 (not assiged), but it is set to 1234.56. We dont handle this rare
-    # case, because the value for the special setter is mostly a string
+    # the price is 0.0 (not assiged)
     product = TestProduct.new
     product.amount_field_price = 1234.56
     assert !product.valid?, "expect 1234.56 to be invalid (#{product.errors.full_messages.inspect})"
-    assert_in_delta 1234.56, product.price.to_f, 0.001
+    assert_in_delta 0.0, product.price.to_f, 0.001
   end
 
   test "special setter accept german format value" do
@@ -285,6 +284,16 @@ class ValidationsTest < ActiveSupport::TestCase
         assert p.valid?, p.errors.full_messages.inspect
       end 
     end  
+  end
+
+  test "an invalid value is still invalid after multiple validation" do
+    class TestProductValidValid < ActiveRecord::Base
+      set_table_name 'test_products'
+      validates_amount_format_of :price
+    end
+    p = TestProductValidValid.new(:amount_field_price => "x")
+    assert !p.valid?
+    assert !p.valid?
   end
 
 end

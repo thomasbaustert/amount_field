@@ -155,6 +155,12 @@ and assigned to the original attribute <tt>price</tt>. Following validation macr
 the converted value. That's why it is currently important to call 
 <tt>validates_amount_format_of</tt> before every other macro.
   
+Note! For this to work, the plugin uses an instance of the class
+<tt>AmountField::ActiveRecord::Validations::AssignedValue</tt> internally. It holds the original 
+assigned value and does the convertion. If the format validation fails, the 
+<tt>XXX_before_type_cast</tt> method returns an instance of this class.
+If you ever need the original value you get it via the method <tt>av.original_value</tt>. 
+  
 == Running Tests
 
 You need a database <tt>gem_amount_field_test</tt> to run all tests.
