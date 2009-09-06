@@ -12,24 +12,27 @@ module AmountField #:nodoc:
       module ClassMethods
         
         def validates_amount_format_of(*attr_names)
-          # called only once
+          # code before validates_each is called only once!
           configuration = attr_names.extract_options!
 
           define_special_setter(attr_names, configuration)
 
-          # defines the callbacks methods that are called on validation
+          # the following code defines the callbacks methods that are called on every validation
           validates_each(attr_names, configuration) do |record, attr_name, value|
-            raw_value = record.send("#{attr_name}_before_type_cast") || value
-
             # in case there is no assignment via 'amount_field_XXX=' method, we don't need to validate.
-            next unless raw_value.kind_of?(AssignedValue)
+            next unless record.instance_variable_defined?("@#{special_method_name(attr_name)}")
 
-            converted_value = raw_value.convert(format_configuration(configuration))
-            original_value  = raw_value.original_value
+            # get the original assigned value first to always run the validation for this value!
+            # if we us 'before_type_cast' here, we would get the converted value and not the 
+            # original value if we call the validation twice.
+            original_value = record.instance_variable_get("@#{special_method_name(attr_name)}")
+            original_value ||= record.send("#{attr_name}_before_type_cast") || value
 
             # in case nil or blank is allowed, we don't validate
             next if configuration[:allow_nil] and original_value.nil?
             next if configuration[:allow_blank] and original_value.blank?
+
+            converted_value = convert(original_value, format_configuration(configuration))
 
             if valid_format?(original_value, format_configuration(configuration))
               # assign converted value to attribute so other validations macro can work on it 
@@ -38,7 +41,7 @@ module AmountField #:nodoc:
             else  
               # assign original value as AssignedValue so multiple calls of this validation will
               # consider the value still as invalid.
-              record.send("#{attr_name}=", raw_value)
+              record.send("#{attr_name}=", original_value)
               record.errors.add(attr_name, :invalid_amount_format, :value => original_value, 
                 :default => configuration[:message], 
                 :format_example => valid_format_example(format_configuration(configuration)))
@@ -52,11 +55,26 @@ module AmountField #:nodoc:
           def define_special_setter(attr_names, configuration)
             attr_names.each do |attr_name| 
               class_eval <<-EOV
-                def #{AmountField::Configuration.prefix}_#{attr_name}=(value)
-                  self[:#{attr_name}] = AssignedValue.new(value)
+                def #{special_method_name(attr_name)}=(value)
+                  @#{special_method_name(attr_name)} = value
+                  self[:#{attr_name}] = value
+                end
+                
+                def #{special_method_name(attr_name)}  
+                  @#{special_method_name(attr_name)}
                 end
               EOV
             end
+          end
+          
+          def special_method_name(attr_name)
+            "#{AmountField::Configuration.prefix}_#{attr_name}"
+          end
+
+          def convert(original_value, configuration)
+            converted_value = original_value.to_s.gsub(configuration[:delimiter].to_s, '')
+            converted_value = converted_value.sub(configuration[:separator].to_s, '.') unless configuration[:separator].blank?
+            converted_value
           end
           
           # we have to read the configuration every time to get the current I18n value
@@ -93,38 +111,6 @@ module AmountField #:nodoc:
             s
           end
 
-      end
-      
-      # Stores the original assigned value and provide convertion depending on actual configuration.
-      class AssignedValue #:nodoc:
-        attr_accessor :converted_value, :original_value
-
-        def initialize(original_value)
-          @original_value = original_value
-        end
-        
-        def convert(configuration)
-          @converted_value = original_value.to_s.gsub(configuration[:delimiter].to_s, '')
-          @converted_value = @converted_value.sub(configuration[:separator].to_s, '.') unless configuration[:separator].blank?
-          @converted_value
-        end
-
-        # In case of an error, xxx_before_type_cast returns an instance of this class and to_d
-        # is called on that during type_cast. So we need to define this method and we return 
-        # <tt>nil</tt> because the format is invalid and therefore there is no value.
-        # See ActiveRecord::ConnectionAdapters::Column#type_cast
-        def to_d
-          nil
-        end
-            
-        # In case the attribute is of type Float an the format validation fails, xxx_before_type_cast 
-        # returns an instance of this class and to_f is called on that during type_cast. So we need
-        # to define this method we return <tt>nil</tt> because the format is invalid and therefore 
-        # there is no value.
-        # See ActiveRecord::ConnectionAdapters::Column#type_cast
-        def to_f
-          nil
-        end
       end
       
     end

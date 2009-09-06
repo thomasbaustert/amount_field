@@ -9,11 +9,12 @@ ActiveRecord::Base.class_eval do
 end
 
 ActionView::Helpers::FormBuilder.class_eval do
-  include AmountField::Helpers::FormHelper
+  include AmountField::Helpers::FormBuilder
 end
 
-ActionView::Helpers::FormHelper.class_eval do
+ActionView::Base.class_eval do
   include AmountField::Helpers::FormHelper
+  include AmountField::Helpers::FormTagHelper
 end
 
 I18n.load_path << "#{File.dirname(__FILE__)}/../locale/en.yml"

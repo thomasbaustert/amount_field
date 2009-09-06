@@ -19,13 +19,13 @@ class ValidationsTest < ActiveSupport::TestCase
   end
 
   test "special setter does not accept a decimal value" do
-    # special case. The value is assign via the special setter as a decimal not as a string.
+    # Special case: The value is assign via the special setter as a decimal not as a string.
     # The validation fails because the value is not of the german format '1234,56' and therefore
-    # the price is 0.0 (not assiged)
+    # the price should be 0.0 (not assiged) but is 1234.56
     product = TestProduct.new
     product.amount_field_price = 1234.56
     assert !product.valid?, "expect 1234.56 to be invalid (#{product.errors.full_messages.inspect})"
-    assert_in_delta 0.0, product.price.to_f, 0.001
+    assert_in_delta 1234.56, product.price.to_f, 0.001
   end
 
   test "special setter accept german format value" do
@@ -294,6 +294,42 @@ class ValidationsTest < ActiveSupport::TestCase
     p = TestProductValidValid.new(:amount_field_price => "x")
     assert !p.valid?
     assert !p.valid?
+  end
+
+  test "a value is not invalid after multiple validation" do
+    with_locale('de') do
+      class TestProductValidValid < ActiveRecord::Base
+        set_table_name 'test_products'
+        validates_amount_format_of :price
+      end
+      p = TestProductValidValid.new(:amount_field_price => "1.234,56")
+      assert p.valid?
+      assert p.valid?
+    end  
+  end
+
+  test "calling create with an invalid value does not save the model" do
+    class TestProductViaCreate< ActiveRecord::Base
+      set_table_name 'test_products'
+      validates_amount_format_of :price
+    end
+    assert_no_difference 'TestProduct.count' do
+      p = TestProductViaCreate.create(:amount_field_price => "x")
+      assert p.new_record?
+      assert !p.valid?
+    end
+  end
+  
+  test "something interesting" do
+    class TestProductWithOtherValidationMacros < ActiveRecord::Base
+      set_table_name 'test_products'
+      validates_amount_format_of :price
+      validates_numericality_of :price
+    end
+    p = TestProductWithOtherValidationMacros.new(:amount_field_price => "x")
+    assert !p.valid?
+    assert p.errors.full_messages.include?("Price 'x' is not a valid amount format (d,ddd.dd)")
+    assert p.errors.full_messages.include?("Price is not a number")
   end
 
 end

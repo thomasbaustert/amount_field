@@ -1,3 +1,9 @@
+== 1.3.0 2009-09-06
+
+* fix: helper amount_field_tag no works as expected (accepting name and value instead of object and method)
+* add helper amount_field for ActionView::Base and amount_field for ActionView::Helpers::FormBuilder
+* use an instance variable internally for the original assigned value and remove class AssignedValue
+
 == 1.2.0 2009-09-04
 
 * fix: an invalid value is still invalid after multiple calls to valid?

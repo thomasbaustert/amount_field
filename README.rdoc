@@ -18,19 +18,26 @@ As plugin:
 
 == Example
 
-First use the helper <tt>amount_field</tt> or <tt>amount_field_tag</tt> instead of
-the <tt>text_field</tt> helper:
+First: Use the helper <tt>amount_field</tt> instead of the <tt>text_field</tt> helper:
 
   <% form_for(@product) do |f| %>
     <%= f.amount_field :price %>
      ...    
   <% end %>
 
+  <% form_for(@product) do |f| %>
+    <%= amount_field :product, :price %>
+     ...    
+  <% end %>
+
+The helper <tt>amount_field_tag</tt> is provided too, but you have to handle the validation on
+your own:
+
   <% form_tag(:action => "create", {}) do -%> 
-    <%= amount_field_tag :product, :price %>
+    <%= amount_field_tag :price, 1234.56 %>
   ...  
 
-Second use the validation macro <tt>validates_amount_format_of</tt> in your model:
+Second: Use the validation macro <tt>validates_amount_format_of</tt> in your model:
 
   class Product < ActiveRecord::Base
     validates_amount_format_of :price
@@ -154,12 +161,6 @@ validation the original parameter is converted to a ruby value (e.g. "1.234,56" 
 and assigned to the original attribute <tt>price</tt>. Following validation macros work on
 the converted value. That's why it is currently important to call 
 <tt>validates_amount_format_of</tt> before every other macro.
-  
-Note! For this to work, the plugin uses an instance of the class
-<tt>AmountField::ActiveRecord::Validations::AssignedValue</tt> internally. It holds the original 
-assigned value and does the convertion. If the format validation fails, the 
-<tt>XXX_before_type_cast</tt> method returns an instance of this class.
-If you ever need the original value you get it via the method <tt>av.original_value</tt>. 
   
 == Running Tests
 

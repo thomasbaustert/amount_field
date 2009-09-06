@@ -55,7 +55,6 @@ class ActiveSupport::TestCase
     ensure
       I18n.locale = orig_locale
     end
-    
   end
 
   def assert_valid_formats(formats, test_clazz)
