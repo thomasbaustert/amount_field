@@ -1,6 +1,6 @@
 = AmountField
 
-Allows amount value in german or us format like 1.234,56 or 1,234.56.
+Rails gem/plugin that accepts (amount) values in german or us format like 1.234,56 or 1,234.56".
 
 Only tested for Rails 2.3. It may works with older versions but I haven't tested it.
 Drop me a line if you encounter problems.
