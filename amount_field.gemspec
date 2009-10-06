@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.email = %q{ business@thomasbaustert.de}
   s.extra_rdoc_files = ["README.rdoc", "lib/amount_field.rb", "lib/amount_field/configuration.rb", "lib/amount_field/form_helper.rb", "lib/amount_field/form_tag_helper.rb", "lib/amount_field/validations.rb"]
   s.files = ["History.txt", "MIT-LICENSE", "Manifest", "README.rdoc", "Rakefile", "init.rb", "install.rb", "lib/amount_field.rb", "lib/amount_field/configuration.rb", "lib/amount_field/form_helper.rb", "lib/amount_field/form_tag_helper.rb", "lib/amount_field/validations.rb", "locale/de.yml", "locale/en.yml", "test/form_helper_test.rb", "test/form_tag_helper_test.rb", "test/models/test_product.rb", "test/test_helper.rb", "test/validations_test.rb", "uninstall.rb", "amount_field.gemspec"]
-  s.homepage = %q{git@github.com:thomasbaustert/amount_field.git}
+  s.homepage = %q{http://github.com/thomasbaustert/amount_field}
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Amount_field", "--main", "README.rdoc"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{amount_field}
