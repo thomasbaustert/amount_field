@@ -88,7 +88,7 @@ module AmountField #:nodoc:
 
           def valid_format?(value, configuration)
             return false if !value.kind_of?(String) || value.blank?
-            
+
             # add ,00 to 1234 
             if !value.include?(configuration[:separator].to_s) && !configuration[:separator].blank?
               value = "#{value}#{configuration[:separator]}#{'0' * configuration[:precision].to_i}"
@@ -99,7 +99,7 @@ module AmountField #:nodoc:
             cp = configuration[:precision]
 
             # (1234 | 123.456),00 
-            !(value =~ /\A((\d*)|(\d{0,3}(#{cd}\d{3})*))#{cs}\d{#{cp}}\z/).nil?
+            !(value =~ /\A[-\+]{0,1}((\d*)|(\d{0,3}(#{cd}\d{3})*))#{cs}\d{0,#{cp}}\z/).nil?
           end
           
           def valid_format_example(configuration)

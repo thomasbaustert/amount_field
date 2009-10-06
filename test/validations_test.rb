@@ -2,6 +2,54 @@ require File.join(File.dirname(__FILE__), 'test_helper')
 
 class ValidationsTest < ActiveSupport::TestCase
 
+  # allows stuff like de_test_values.with_minus.to_us
+  class ::Hash
+    def with_plus
+      self.inject({}) { |h, (k, v)| h["+#{k}"] = v; h }
+    end
+    
+    def with_minus
+      self.inject({}) { |h, (k, v)| h["-#{k}"] = (v*-1.0); h }
+    end
+    
+    def to_us
+      self.inject({}) { |h, (k, v)| h[k.sub(',', ';').gsub('.', ',').sub(';', '.')] = v; h }
+    end
+  end
+
+  def de_test_values
+    {
+      '0' => 0.0, 
+      ',0' => 0.0, 
+      ',00' => 0.0,
+      '1' => 1.0, 
+      '1,' => 1.0, 
+      '1,0' => 1.0, 
+      '1,00' => 1.0, 
+      '12' => 12.0, 
+      '12,' => 12.0, 
+      '12,0' => 12.0, 
+      '12,00' => 12.0, 
+      '123' => 123.0, 
+      '123,' => 123.0, 
+      '123,0' => 123.0, 
+      '123,00' => 123.0, 
+      '1234' => 1234.0, 
+      '1234,' => 1234.0, 
+      '1234,0' => 1234.0, 
+      '1234,00' => 1234.0, 
+      '1234,56' => 1234.56, 
+      '1.234,56' => 1234.56, 
+      '12345,67' => 12345.67, 
+      '12.345,67' => 12345.67, 
+      '123456,78' => 123456.78, 
+      '123.456,78' => 123456.78, 
+      '1234567,89' => 1234567.89,
+      '1.234.567,89' => 1234567.89 
+    }
+  end
+  
+  
   test "orignal setter accept ruby value if set via new" do
     product = TestProduct.new(:price => 12.34)
     assert_in_delta 12.34, product.price, 0.001
@@ -44,9 +92,9 @@ class ValidationsTest < ActiveSupport::TestCase
     end
 
     with_locale('de') do
-      assert_valid_formats({',00' => 0.0, '1,00' => 1.0, '12,00' => 12.0, '123,00' => 123.0, '1234,00' => 1234.0, 
-                            '1.234,56' => 1234.56, '12.345,00' => 12345.0, '123.456,00' => 123456.0, 
-                            '1.234.567,00' => 1234567.00 }, TestProductValidGermanFormat)
+      assert_valid_formats(de_test_values, TestProductValidGermanFormat)
+      assert_valid_formats(de_test_values.with_minus, TestProductValidGermanFormat) # -value
+      assert_valid_formats(de_test_values.with_plus, TestProductValidGermanFormat)  # +value
     end                        
   end
   
@@ -57,9 +105,11 @@ class ValidationsTest < ActiveSupport::TestCase
         validates_amount_format_of :price
       end
 
-      assert_valid_formats({'.00' => 0.0, '1.00' => 1.0, '12.00' => 12.0, '123.00' => 123.0, '1234.00' => 1234.0, 
-                            '1,234.56' => 1234.56, '12,345.00' => 12345.0, '123,456.00' => 123456.0, 
-                            '1,234,567.00' => 1234567.00 }, TestProductValidUsFormat)
+      with_locale('de') do
+        assert_valid_formats(de_test_values.to_us, TestProductValidUsFormat)
+        assert_valid_formats(de_test_values.to_us.with_minus, TestProductValidUsFormat) # -value
+        assert_valid_formats(de_test_values.to_us.with_plus, TestProductValidUsFormat)  # +value
+      end                        
     end                            
   end
 
@@ -70,8 +120,9 @@ class ValidationsTest < ActiveSupport::TestCase
     end
 
     with_locale('de') do
-      assert_invalid_formats(['1234.567.890,12', '123.4567.890,12', '1,2.34', '1,2,3', '1.23,45', 
-                              '1.23.45,6', '2,1x', '2,x', 'x2', '', nil], TestProductInValidGermanFormat)
+      assert_invalid_formats(['1234.567.890,12', '123.4567.890,12', '1,2.34', '1,2,3', '1.23,45',
+        '1.23.45,6', '2,1x', '2,x', 'x2', '++1,23', '+-1,23', '--1,23', '-+1,23', nil], 
+        TestProductInValidGermanFormat)
     end                          
   end
 
