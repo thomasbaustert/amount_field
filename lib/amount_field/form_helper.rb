@@ -11,7 +11,7 @@ module AmountField #:nodoc:
         format_options.merge!(options.delete(:format) || {})
 
         object = options.delete(:object) || instance_variable_get("@#{object_name}")
-        
+
         # if no explicit value is given, we set a formatted one. In case of an error we take the
         # original value inserted by the user.
         unless object.errors.on(method)
@@ -19,7 +19,8 @@ module AmountField #:nodoc:
         else
           options[:value] ||= object.send("#{method}_before_type_cast")
         end
-        options[:name]  = "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"
+
+        options[:name]  ||= "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"
         options[:class] = "#{options[:class]} #{AmountField::Configuration.css_class}"
         options[:id]    ||= "#{object_name}_#{method}"
 
@@ -49,8 +50,10 @@ module AmountField #:nodoc:
         else
           options[:value] ||= object.send("#{method}_before_type_cast")
         end
-        options[:name]  = "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"
+
+        options[:name]  ||= "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"
         options[:class] = "#{options[:class]} #{AmountField::Configuration.css_class}"
+        options[:id]    ||= "#{object_name}_#{method}"
         
         text_field(method, options)
       end

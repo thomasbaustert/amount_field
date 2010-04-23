@@ -197,6 +197,38 @@ class FormHelperTest < ActionView::TestCase
     assert_dom_equal expected_form, output_buffer
   end
   
+  test "consider option name if given" do
+    @test_product = TestProduct.new(:amount_field_price => "47.11")
+    form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      concat f.amount_field(:price, :name => 'article')
+    end
+
+    expected_input =
+      "<input name='article' size='30'" + 
+      "       class=' amount_field' type='text' id='test_product_price' value='47.11' />"
+    expected_form =
+      "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
+    
+    assert_dom_equal expected_input, amount_field(:test_product, :price, :name => 'article', :value => 47.11)
+    assert_dom_equal expected_form, output_buffer
+  end
+
+  test "consider option id if given" do
+    @test_product = TestProduct.new(:amount_field_price => "63.41")
+    form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      concat f.amount_field(:price, :name => 'article', :id => 'my_id')
+    end
+
+    expected_input =
+      "<input name='article' size='30'" + 
+      "       class=' amount_field' type='text' id='my_id' value='63.41' />"
+    expected_form =
+      "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
+    
+    assert_dom_equal expected_input, amount_field(:test_product, :price, :name => 'article', :id => 'my_id', :value => 63.41)
+    assert_dom_equal expected_form, output_buffer
+  end
+  
   protected
   
     def protect_against_forgery?

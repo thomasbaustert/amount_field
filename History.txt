@@ -1,3 +1,13 @@
+== 1.4.1 2010-04-23
+
+* Method amount_field considers given option "name" and "id":
+  <% form_for(@manager) do |f| %>
+    <%= f.amount_field :salary, :name => :salary, :id => "salary_id" %>
+    ...
+  =>
+  <input name="salary" id="salary_id" ... /> instead of 
+  <input name="manager[amount_field_value]" id="manager_salary"... />
+
 == 1.4.0 2009-10-06
 
 * fix: negative values like '-1,00', '-1,0', '-1,' or '-1' are considered valid
