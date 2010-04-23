@@ -170,6 +170,7 @@ See test_helper.rb for details.
 == Credits
 
 * Michael Schiller (for feedback and ideas)
+* Clements Teichmann (consider option 'name' and 'id')
  
 == Contact
 
