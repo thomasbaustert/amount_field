@@ -228,6 +228,42 @@ class FormHelperTest < ActionView::TestCase
     assert_dom_equal expected_input, amount_field(:test_product, :price, :name => 'article', :id => 'my_id', :value => 63.41)
     assert_dom_equal expected_form, output_buffer
   end
+
+  test "invalid negative value is displayed with current format options" do
+    with_locale('de') do
+      class MyTestProduct < ActiveRecord::Base
+        set_table_name 'test_products'
+        validates_amount_format_of :price
+        validates_numericality_of :price, :greater_than_or_equal_to => 0.0
+      end
+      @test_product = MyTestProduct.new(:amount_field_price => "-0,1")
+      @test_product.valid?
+
+      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+        concat f.amount_field(:price)
+      end
+
+      assert_match /value="-0,1"/, output_buffer
+    end
+  end
+
+  test "invalid positive value is displayed with current format options" do
+    with_locale('de') do
+      class MyTestProduct < ActiveRecord::Base
+        set_table_name 'test_products'
+        validates_amount_format_of :price
+        validates_numericality_of :price, :less_than_or_equal_to => 10.0
+      end
+      @test_product = MyTestProduct.new(:amount_field_price => "12,34")
+      @test_product.valid?
+
+      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+        concat f.amount_field(:price)
+      end
+
+      assert_match /value="12,34"/, output_buffer
+    end
+  end
   
   protected
   

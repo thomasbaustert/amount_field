@@ -7,6 +7,8 @@
   =>
   <input name="salary" id="salary_id" ... /> instead of 
   <input name="manager[amount_field_value]" id="manager_salary"... />
+* fix: display invalid value in current format (e.g. in german format: "-0,1" or "12,34" 
+  and not "-0.1" and "12.34").
 
 == 1.4.0 2009-10-06
 

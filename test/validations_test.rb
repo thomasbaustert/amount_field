@@ -371,7 +371,7 @@ class ValidationsTest < ActiveSupport::TestCase
     end
   end
   
-  test "something interesting" do
+  test "another validation macro validates the converted value" do
     class TestProductWithOtherValidationMacros < ActiveRecord::Base
       set_table_name 'test_products'
       validates_amount_format_of :price

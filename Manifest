@@ -3,6 +3,7 @@ MIT-LICENSE
 Manifest
 README.rdoc
 Rakefile
+amount_field.gemspec
 init.rb
 install.rb
 lib/amount_field.rb

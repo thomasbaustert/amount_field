@@ -1,6 +1,9 @@
 module AmountField #:nodoc:
   module Helpers #:nodoc:
 
+    #TODO/2010-04-23/tb remove redundant code
+    # using @template.amount_field(object, method, options) !?
+    
     module FormHelper #:nodoc:
 
       include ActionView::Helpers::NumberHelper
@@ -17,7 +20,7 @@ module AmountField #:nodoc:
         unless object.errors.on(method)
           options[:value] ||= number_with_precision(object.send(method), format_options)
         else
-          options[:value] ||= object.send("#{method}_before_type_cast")
+          options[:value] ||= object.send("#{AmountField::Configuration.prefix}_#{method}") || object.send("#{method}_before_type_cast")
         end
 
         options[:name]  ||= "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"
@@ -34,7 +37,6 @@ module AmountField #:nodoc:
       include ActionView::Helpers::NumberHelper
 
       def amount_field(method, options = {})
-        #todo try to remove redundant code by using: @template.amount_field(object, method, options)
         format_options = I18n.t(:'number.amount_field.format', :raise => true) rescue {}
         format_options = format_options.merge(AmountField::ActiveRecord::Validations.configuration)
         format_options.merge!(options.delete(:format) || {})
@@ -42,13 +44,13 @@ module AmountField #:nodoc:
         if (explicit_object = options.delete(:object))
           self.object = explicit_object
         end
-            
+
         # if no explicit value is given, we set a formatted one. In case of an error we take the
         # original value inserted by the user.
         unless object.errors.on(method)
           options[:value] ||= number_with_precision(object.send(method), format_options)
         else
-          options[:value] ||= object.send("#{method}_before_type_cast")
+          options[:value] ||= object.send("#{AmountField::Configuration.prefix}_#{method}") || object.send("#{method}_before_type_cast")
         end
 
         options[:name]  ||= "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"

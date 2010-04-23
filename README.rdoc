@@ -14,7 +14,7 @@ As Gem:
 
 As plugin:
 
-  $ script/plugin install git://github.com/thomasbaustert/amount_field.git
+  $ script/plugin install git://github.com/thomasbaustert/amount_field.git -r 2.3
 
 == Example
 
