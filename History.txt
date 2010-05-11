@@ -1,3 +1,7 @@
+== 1.4.1 2010-05-11
+
+* Don't set default dom Id for FormBuilder amount_field, use Rails default or use given one.
+
 == 1.4.1 2010-04-23
 
 * Method amount_field considers given option "name" and "id":

@@ -53,9 +53,10 @@ module AmountField #:nodoc:
           options[:value] ||= object.send("#{AmountField::Configuration.prefix}_#{method}") || object.send("#{method}_before_type_cast")
         end
 
+        # Note: we don't set options[:id] here, because caller or Rails knows best what to do.
+        # We accidentally set it to "foo[bar]_name" instead of "foo_bar_name".
         options[:name]  ||= "#{object_name}[#{AmountField::Configuration.prefix}_#{method}]"
         options[:class] = "#{options[:class]} #{AmountField::Configuration.css_class}"
-        options[:id]    ||= "#{object_name}_#{method}"
         
         text_field(method, options)
       end

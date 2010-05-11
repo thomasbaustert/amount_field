@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{amount_field}
-  s.version = "1.4.1"
+  s.version = "1.4.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Thomas Baustert"]
-  s.date = %q{2010-04-23}
+  s.date = %q{2010-05-11}
   s.description = %q{Rails gem/plugin that accepts (amount) values in german or us format like 1.234,56 or 1,234.56}
   s.email = %q{ business@thomasbaustert.de}
   s.extra_rdoc_files = ["README.rdoc", "lib/amount_field.rb", "lib/amount_field/configuration.rb", "lib/amount_field/form_helper.rb", "lib/amount_field/form_tag_helper.rb", "lib/amount_field/validations.rb"]
