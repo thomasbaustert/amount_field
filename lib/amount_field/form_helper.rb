@@ -17,7 +17,7 @@ module AmountField #:nodoc:
 
         # if no explicit value is given, we set a formatted one. In case of an error we take the
         # original value inserted by the user.
-        unless object.errors.on(method)
+        unless object.errors[method]
           options[:value] ||= number_with_precision(object.send(method), format_options)
         else
           options[:value] ||= object.send("#{AmountField::Configuration.prefix}_#{method}") || object.send("#{method}_before_type_cast")
@@ -47,7 +47,7 @@ module AmountField #:nodoc:
 
         # if no explicit value is given, we set a formatted one. In case of an error we take the
         # original value inserted by the user.
-        unless object.errors.on(method)
+        unless object.errors[method]
           options[:value] ||= number_with_precision(object.send(method), format_options)
         else
           options[:value] ||= object.send("#{AmountField::Configuration.prefix}_#{method}") || object.send("#{method}_before_type_cast")

@@ -1,4 +1,8 @@
-== 1.4.1 2010-05-11
+== 3.0.0 2011-03-29
+
+* Migrate to Rails3
+
+== 1.4.2 2010-05-11
 
 * Don't set default dom Id for FormBuilder amount_field, use Rails default or use given one.
 

@@ -187,7 +187,7 @@ class ValidationsTest < ActiveSupport::TestCase
     with_locale('en') do
       product = TestProductEnglishMessage.new(:amount_field_price => 'x')
       assert !product.valid?
-      assert_equal "'x' is not a valid amount format (d,ddd.dd)", product.errors.on(:price)
+      assert_equal "'x' is not a valid amount format (d,ddd.dd)", product.errors[:price]
     end  
   end
 
@@ -200,7 +200,7 @@ class ValidationsTest < ActiveSupport::TestCase
     with_locale('de') do
       product = TestProductGermanMessage.new(:amount_field_price => 'x')
       assert !product.valid?
-      assert_equal "'x' ist ein ungültiges Format (d.ddd,dd)", product.errors.on(:price)
+      assert_equal "'x' ist ein ungültiges Format (d.ddd,dd)", product.errors[:price]
     end
   end
 
@@ -212,7 +212,7 @@ class ValidationsTest < ActiveSupport::TestCase
 
     product = TestProductGivenMessage.new(:amount_field_price => 'x')
     assert !product.valid?
-    assert_equal "special message x", product.errors.on(:price)
+    assert_equal "special message x", product.errors[:price]
   end
 
   test "matches if precision is right" do
@@ -255,8 +255,8 @@ class ValidationsTest < ActiveSupport::TestCase
     
     product = TestProductNilOrBlankNotValidByDefault.new(:amount_field_price => nil, :amount_field_stock_price => "")
     assert !product.valid?
-    assert_match /format/, product.errors.on(:price)
-    assert_match /format/, product.errors.on(:stock_price)
+    assert_match /format/, product.errors[:price]
+    assert_match /format/, product.errors[:stock_price]
   end
 
   test "nil or blank value is valid if option :allow_nil or :allow_blank is set to true" do

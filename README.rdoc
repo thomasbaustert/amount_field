@@ -2,10 +2,18 @@
 
 Rails gem/plugin that accepts (amount) values in german or us format like 1.234,56 or 1,234.56".
 
-Only tested for Rails 2.3. It may works with older versions but I haven't tested it.
-Drop me a line if you encounter problems.
+== Installation Rails 3
 
-== Installation
+As Gem:
+
+  $ gem sources -a http://gemcutter.org/ (you only have to do this once)
+  $ sudo gem install amount_field_rails3
+
+As plugin:
+
+  $ rails plugin install git://github.com/thomasbaustert/amount_field.git
+
+== Installation Rails 2.x
 
 As Gem:
 
@@ -14,18 +22,18 @@ As Gem:
 
 As plugin:
 
-  $ script/plugin install git://github.com/thomasbaustert/amount_field.git
+  $ script/plugin install git://github.com/thomasbaustert/amount_field.git, :branch => 'rails23'
 
 == Example
 
 First: Use the helper <tt>amount_field</tt> instead of the <tt>text_field</tt> helper:
 
-  <% form_for(@product) do |f| %>
+  <%= form_for(@product) do |f| %>
     <%= f.amount_field :price %>
      ...    
   <% end %>
 
-  <% form_for(@product) do |f| %>
+  <%= form_for(@product) do |f| %>
     <%= amount_field :product, :price %>
      ...    
   <% end %>
@@ -33,7 +41,7 @@ First: Use the helper <tt>amount_field</tt> instead of the <tt>text_field</tt> h
 The helper <tt>amount_field_tag</tt> is provided too, but you have to handle the validation on
 your own:
 
-  <% form_tag(:action => "create", {}) do -%> 
+  <%= form_tag(:action => "create", {}) do -%> 
     <%= amount_field_tag :price, 1234.56 %>
   ...  
 
