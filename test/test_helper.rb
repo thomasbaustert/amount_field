@@ -1,6 +1,6 @@
 ENV["RAILS_ENV"] = "test"
 require File.expand_path(File.dirname(__FILE__) + "/../../../../config/environment")
-require 'test_help'
+require 'rails/test_help'
 
 #TODO/2009-07-21/tb über environment oder diese gems?
 # require 'rubygems'
@@ -18,7 +18,7 @@ require File.join(File.dirname(__FILE__), '../init')
 Dir[File.join(File.dirname(__FILE__), 'models/*.rb')].each { |f| require f }
 
 ActiveRecord::Base.establish_connection({
-  :adapter  => 'mysql',
+  :adapter  => 'mysql2',
   :database => 'gem_amount_field_test',
   :host     => 'localhost',
   :username => 'root',
