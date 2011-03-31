@@ -381,6 +381,9 @@ class ValidationsTest < ActiveSupport::TestCase
     end
     p = TestProductWithOtherValidationMacros.new(:amount_field_price => "x")
     assert !p.valid?
+
+    p p.errors.full_messages
+    
     assert p.errors.full_messages.include?("Price 'x' is not a valid amount format (d,ddd.dd)")
     assert p.errors.full_messages.include?("Price is not a number")
   end

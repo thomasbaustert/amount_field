@@ -1,8 +1,7 @@
 de:
-  activerecord:
-    errors:
-      messages:
-        invalid_amount_format: "'{{value}}' ist ein ungültiges Format ({{format_example}})"
+  errors:
+    messages:
+      invalid_amount_format: "'{{value}}' ist ein ungültiges Format ({{format_example}})"
   number:
     amount_field:
       format:

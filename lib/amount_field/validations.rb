@@ -42,9 +42,15 @@ module AmountField #:nodoc:
               # assign original value as AssignedValue so multiple calls of this validation will
               # consider the value still as invalid.
               record.send("#{attr_name}=", original_value)
-              record.errors.add(attr_name, :invalid_amount_format, :value => original_value, 
-                :default => configuration[:message], 
-                :format_example => valid_format_example(format_configuration(configuration)))
+              record.errors.add(attr_name, 
+                I18n.t('errors.messages.invalid_amount_format', {
+                  :value => original_value, 
+                  :format_example => valid_format_example(format_configuration(configuration))}
+                  ), 
+                # :value => original_value, 
+                # :default => configuration[:message], 
+                # :format_example => valid_format_example(format_configuration(configuration))
+                )
             end  
 
           end
@@ -95,7 +101,7 @@ module AmountField #:nodoc:
             end   
 
             cs = configuration[:separator]
-            cd = "\\#{configuration[:delimiter]}"
+            cd = "\\#{configuration[:delimiter] || ' '}"
             cp = configuration[:precision]
 
             # (1234 | 123.456),00 
