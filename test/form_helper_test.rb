@@ -23,6 +23,9 @@ class FormHelperTest < ActionView::TestCase
     end
     @controller = @controller.new
     @test_product = TestProduct.new(:price => 1234.56)
+
+    AmountField::Configuration.prefix = 'amount_field'
+    AmountField::Configuration.css_class = 'amount_field'
   end
   
   def test_products_path
@@ -43,14 +46,8 @@ class FormHelperTest < ActionView::TestCase
         "<input class=' amount_field' id='test_product_price'" +
         " name='test_product[amount_field_price]' size='30' type='text' value='1.234,56' />"
     
-      expected_form =
-        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
-        "<div style='margin:0;padding:0;display:inline'>" +
-        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
-        "#{expected_input}</form>"
-
       assert_dom_equal expected_input, amount_field(:test_product, :price)
-      assert_dom_equal expected_form, output_buffer
+      assert_dom_equal expected_form(expected_input), output_buffer
     end  
   end
 
@@ -64,14 +61,8 @@ class FormHelperTest < ActionView::TestCase
         "<input name='test_product[amount_field_price]' size='30' type='text'" +
         " class=' amount_field' id='test_product_price' value='1,234.56' />"
 
-      expected_form =
-        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
-        "<div style='margin:0;padding:0;display:inline'>" +
-        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
-        "#{expected_input}</form>"
-      
       assert_dom_equal expected_input, amount_field(:test_product, :price)
-      assert_dom_equal expected_form, output_buffer
+      assert_dom_equal expected_form(expected_input), output_buffer
     end  
   end
 
@@ -83,17 +74,11 @@ class FormHelperTest < ActionView::TestCase
       end
 
       expected_input =
-        "<input name='test_product[my_prefix_price]' size='30' type='text'" +
-        " class=' amount_field' id='test_product_price' value='1.234,56' />"
-      
-      expected_form =
-        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
-        "<div style='margin:0;padding:0;display:inline'>" +
-        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
-        "#{expected_input}</form>"
+        "<input class=' amount_field' name='test_product[my_prefix_price]' size='30' type='text'" +
+        " id='test_product_price' value='1.234,56' />"
       
       assert_dom_equal expected_input, amount_field(:test_product, :price)
-      assert_dom_equal expected_form, output_buffer
+      assert_dom_equal expected_form(expected_input), output_buffer
       AmountField::Configuration.prefix = 'amount_field'
     end  
   end
@@ -101,7 +86,7 @@ class FormHelperTest < ActionView::TestCase
   test "configured css class is use in amount_field" do
     with_locale('de') do
       AmountField::Configuration.css_class = 'my_class'
-      form_for(@test_product, :builder => MyFormBuilder) do |f|
+      output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -109,21 +94,15 @@ class FormHelperTest < ActionView::TestCase
         "<input name='test_product[amount_field_price]' size='30' type='text'" +
         " class=' my_class' id='test_product_price' value='1.234,56' />"
 
-      expected_form =
-        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
-        "<div style='margin:0;padding:0;display:inline'>" +
-        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
-        "#{expected_input}</form>"
-      
       assert_dom_equal expected_input, amount_field(:test_product, :price)
-      assert_dom_equal expected_form, output_buffer
+      assert_dom_equal expected_form(expected_input), output_buffer
       AmountField::Configuration.css_class = 'amount_field'
     end  
   end
 
   test "default configuration format overwrite I18n configuration" do
     with_configuration({ :delimiter => '@', :separator => '/', :precision => 2}) do
-      form_for(@test_product, :builder => MyFormBuilder) do |f|
+      output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -131,18 +110,15 @@ class FormHelperTest < ActionView::TestCase
         "<input name='test_product[amount_field_price]' size='30' type='text'" +
         " class=' amount_field' id='test_product_price' value='1@234/56' />"
 
-      expected_form =
-        "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
-
       assert_dom_equal expected_input, amount_field(:test_product, :price)
-      assert_dom_equal expected_form, output_buffer
+      assert_dom_equal expected_form(expected_input), output_buffer
     end  
   end
 
   test "explicit format overwrite default configuration" do
     format = { :delimiter => '@', :separator => '/', :precision => 3 }
     with_locale('de') do
-      form_for(@test_product, :builder => MyFormBuilder) do |f|
+      output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price, :format => format)
       end
 
@@ -150,11 +126,8 @@ class FormHelperTest < ActionView::TestCase
         "<input name='test_product[amount_field_price]' size='30' type='text'" +
         " class=' amount_field' id='test_product_price' value='1@234/560' />"
 
-      expected_form =
-        "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
-
       assert_dom_equal expected_input, amount_field(:test_product, :price, :format => format)
-      assert_dom_equal expected_form, output_buffer
+      assert_dom_equal expected_form(expected_input), output_buffer
       assert_equal({}, AmountField::ActiveRecord::Validations.configuration)
     end                
   end
@@ -162,41 +135,35 @@ class FormHelperTest < ActionView::TestCase
   test "we show the original value for an invalid value" do
     @test_product = TestProduct.new(:amount_field_price => "x")
     @test_product.valid?
-    form_for(@test_product, :builder => MyFormBuilder) do |f|
+    output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price)
     end
 
     expected_input =
-      "<div class='fieldWithErrors'>" +
+      "<div class='field_with_errors'>" +
       "<input name='test_product[amount_field_price]' size='30'" + 
       "       class=' amount_field' type='text' id='test_product_price' value='x' />" +
       "</div>" 
 
-    expected_form =
-      "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
-
     assert_dom_equal expected_input, amount_field(:test_product, :price)
-    assert_dom_equal expected_form, output_buffer
+    assert_dom_equal expected_form(expected_input), output_buffer
   end
   
   test "we show the given value instead of the invalid value" do
     @test_product = TestProduct.new(:amount_field_price => "x")
     @test_product.valid?
-    form_for(@test_product, :builder => MyFormBuilder) do |f|
+    output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price, :value => 4711)
     end
 
     expected_input =
-      "<div class='fieldWithErrors'>" +
+      "<div class='field_with_errors'>" +
       "<input name='test_product[amount_field_price]' size='30'" + 
       "       class=' amount_field' type='text' id='test_product_price' value='4711' />" +
       "</div>" 
     
-    expected_form =
-      "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
-      
     assert_dom_equal expected_input, amount_field(:test_product, :price, :value => 4711)
-    assert_dom_equal expected_form, output_buffer
+    assert_dom_equal expected_form(expected_input), output_buffer
   end
 
   test "we use the object from options if given" do
@@ -204,7 +171,7 @@ class FormHelperTest < ActionView::TestCase
     @test_product1.valid?
     test_product2 = TestProduct.new(:amount_field_price => "1234.56")
     test_product2.valid?
-    form_for(@test_product1, :builder => MyFormBuilder) do |f|
+    output_buffer = form_for(@test_product1, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price, :object => test_product2)
     end
 
@@ -212,43 +179,36 @@ class FormHelperTest < ActionView::TestCase
       "<input name='test_product[amount_field_price]' size='30'" + 
       "       class=' amount_field' type='text' id='test_product_price' value='1,234.56' />"
     
-    expected_form =
-      "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
-      
     assert_dom_equal expected_input, amount_field(:test_product, :price, :object => test_product2)
-    assert_dom_equal expected_form, output_buffer
+    assert_dom_equal expected_form(expected_input), output_buffer
   end
   
   test "consider option name if given" do
     @test_product = TestProduct.new(:amount_field_price => "47.11")
-    form_for(@test_product, :builder => MyFormBuilder) do |f|
+    output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price, :name => 'article')
     end
 
     expected_input =
       "<input name='article' size='30'" + 
       "       class=' amount_field' type='text' id='test_product_price' value='47.11' />"
-    expected_form =
-      "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
     
     assert_dom_equal expected_input, amount_field(:test_product, :price, :name => 'article', :value => 47.11)
-    assert_dom_equal expected_form, output_buffer
+    assert_dom_equal expected_form(expected_input), output_buffer
   end
 
   test "consider option id if given" do
     @test_product = TestProduct.new(:amount_field_price => "63.41")
-    form_for(@test_product, :builder => MyFormBuilder) do |f|
+    output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price, :name => 'article', :id => 'my_id')
     end
 
     expected_input =
       "<input name='article' size='30'" + 
       "       class=' amount_field' type='text' id='my_id' value='63.41' />"
-    expected_form =
-      "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
     
     assert_dom_equal expected_input, amount_field(:test_product, :price, :name => 'article', :id => 'my_id', :value => 63.41)
-    assert_dom_equal expected_form, output_buffer
+    assert_dom_equal expected_form(expected_input), output_buffer
   end
 
   test "invalid negative value is displayed with current format options" do
@@ -261,7 +221,7 @@ class FormHelperTest < ActionView::TestCase
       @test_product = MyTestProduct.new(:amount_field_price => "-0,1")
       @test_product.valid?
 
-      form_for(@test_product, :builder => MyFormBuilder) do |f|
+      output_buffer = form_for(@test_product, :url => test_products_path, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -279,7 +239,7 @@ class FormHelperTest < ActionView::TestCase
       @test_product = MyTestProduct.new(:amount_field_price => "12,34")
       @test_product.valid?
 
-      form_for(@test_product, :builder => MyFormBuilder) do |f|
+      output_buffer = form_for(@test_product, :url => test_products_path, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
