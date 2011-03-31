@@ -1,4 +1,6 @@
-require File.join(File.dirname(__FILE__), 'test_helper')
+# -*- encoding: utf-8 -*-
+
+require 'test_helper'
 
 class ValidationsTest < ActiveSupport::TestCase
 
