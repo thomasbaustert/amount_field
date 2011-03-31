@@ -25,18 +25,29 @@ class FormHelperTest < ActionView::TestCase
     @test_product = TestProduct.new(:price => 1234.56)
   end
   
+  def test_products_path
+    "/products"
+  end
+
+  def test_product_path
+    "/products"
+  end
+  
   test "amount_field form helper with locale de" do
     with_locale('de') do
-      form_for(@test_product, :as => :product, :builder => MyFormBuilder) do |f|
+      output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
       expected_input =
-        "<input name='test_product[amount_field_price]' size='30' type='text'" +
-        " class=' amount_field' id='test_product_price' value='1.234,56' />"
+        "<input class=' amount_field' id='test_product_price'" +
+        " name='test_product[amount_field_price]' size='30' type='text' value='1.234,56' />"
     
       expected_form =
-        "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
+        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
+        "<div style='margin:0;padding:0;display:inline'>" +
+        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
+        "#{expected_input}</form>"
 
       assert_dom_equal expected_input, amount_field(:test_product, :price)
       assert_dom_equal expected_form, output_buffer
@@ -45,7 +56,7 @@ class FormHelperTest < ActionView::TestCase
 
   test "amount_field form helper with locale en" do
     with_locale('en') do
-      form_for(@test_product, :builder => MyFormBuilder) do |f|
+      output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -54,8 +65,11 @@ class FormHelperTest < ActionView::TestCase
         " class=' amount_field' id='test_product_price' value='1,234.56' />"
 
       expected_form =
-        "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
-
+        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
+        "<div style='margin:0;padding:0;display:inline'>" +
+        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
+        "#{expected_input}</form>"
+      
       assert_dom_equal expected_input, amount_field(:test_product, :price)
       assert_dom_equal expected_form, output_buffer
     end  
@@ -64,7 +78,7 @@ class FormHelperTest < ActionView::TestCase
   test "configured prefix is use in amount_field" do
     with_locale('de') do
       AmountField::Configuration.prefix = 'my_prefix'
-      form_for(@test_product, :builder => MyFormBuilder) do |f|
+      output_buffer = form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -73,7 +87,10 @@ class FormHelperTest < ActionView::TestCase
         " class=' amount_field' id='test_product_price' value='1.234,56' />"
       
       expected_form =
-        "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
+        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
+        "<div style='margin:0;padding:0;display:inline'>" +
+        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
+        "#{expected_input}</form>"
       
       assert_dom_equal expected_input, amount_field(:test_product, :price)
       assert_dom_equal expected_form, output_buffer
@@ -93,8 +110,11 @@ class FormHelperTest < ActionView::TestCase
         " class=' my_class' id='test_product_price' value='1.234,56' />"
 
       expected_form =
-        "<form action='http://www.example.com' method='post'>#{expected_input}</form>"
-
+        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
+        "<div style='margin:0;padding:0;display:inline'>" +
+        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
+        "#{expected_input}</form>"
+      
       assert_dom_equal expected_input, amount_field(:test_product, :price)
       assert_dom_equal expected_form, output_buffer
       AmountField::Configuration.css_class = 'amount_field'
@@ -271,6 +291,14 @@ class FormHelperTest < ActionView::TestCase
   
     def protect_against_forgery?
       false
+    end
+    
+    def expected_form(expected_input_field)
+      expected_form =
+        "<form accept-charset='UTF-8' action='/products' class='new_test_product' id='new_test_product' method='post'>" +
+        "<div style='margin:0;padding:0;display:inline'>" +
+        "<input name='utf8' type='hidden' value='&#x2713;' /></div>" +
+        "#{expected_input_field}</form>"
     end
     
 end
