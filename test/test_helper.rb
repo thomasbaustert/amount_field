@@ -2,18 +2,6 @@ ENV["RAILS_ENV"] = "test"
 require File.expand_path(File.dirname(__FILE__) + "/../../../../config/environment")
 require 'rails/test_help'
 
-#TODO/2009-07-21/tb über environment oder diese gems?
-# require 'rubygems'
-# require 'test/unit'
-# 
-# require 'activesupport'
-# require 'active_support'
-# require 'active_support/test_case'
-# require 'active_record'
-# require 'actionpack'
-# 
-# gem 'rails'
-
 require File.join(File.dirname(__FILE__), '../init')
 Dir[File.join(File.dirname(__FILE__), 'models/*.rb')].each { |f| require f }
 
