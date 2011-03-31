@@ -1,4 +1,6 @@
-require File.join(File.dirname(__FILE__), 'test_helper')
+# -*- encoding: utf-8 -*-
+
+require 'test_helper'
 
 ##
 # Taken from the FormHelperTest in Rails 2.3
@@ -25,7 +27,7 @@ class FormHelperTest < ActionView::TestCase
   
   test "amount_field form helper with locale de" do
     with_locale('de') do
-      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      form_for(@test_product, :as => :product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -43,7 +45,7 @@ class FormHelperTest < ActionView::TestCase
 
   test "amount_field form helper with locale en" do
     with_locale('en') do
-      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -62,7 +64,7 @@ class FormHelperTest < ActionView::TestCase
   test "configured prefix is use in amount_field" do
     with_locale('de') do
       AmountField::Configuration.prefix = 'my_prefix'
-      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -82,7 +84,7 @@ class FormHelperTest < ActionView::TestCase
   test "configured css class is use in amount_field" do
     with_locale('de') do
       AmountField::Configuration.css_class = 'my_class'
-      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -101,7 +103,7 @@ class FormHelperTest < ActionView::TestCase
 
   test "default configuration format overwrite I18n configuration" do
     with_configuration({ :delimiter => '@', :separator => '/', :precision => 2}) do
-      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -120,7 +122,7 @@ class FormHelperTest < ActionView::TestCase
   test "explicit format overwrite default configuration" do
     format = { :delimiter => '@', :separator => '/', :precision => 3 }
     with_locale('de') do
-      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price, :format => format)
       end
 
@@ -140,7 +142,7 @@ class FormHelperTest < ActionView::TestCase
   test "we show the original value for an invalid value" do
     @test_product = TestProduct.new(:amount_field_price => "x")
     @test_product.valid?
-    form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+    form_for(@test_product, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price)
     end
 
@@ -160,7 +162,7 @@ class FormHelperTest < ActionView::TestCase
   test "we show the given value instead of the invalid value" do
     @test_product = TestProduct.new(:amount_field_price => "x")
     @test_product.valid?
-    form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+    form_for(@test_product, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price, :value => 4711)
     end
 
@@ -182,7 +184,7 @@ class FormHelperTest < ActionView::TestCase
     @test_product1.valid?
     test_product2 = TestProduct.new(:amount_field_price => "1234.56")
     test_product2.valid?
-    form_for(:test_product, @test_product1, :builder => MyFormBuilder) do |f|
+    form_for(@test_product1, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price, :object => test_product2)
     end
 
@@ -199,7 +201,7 @@ class FormHelperTest < ActionView::TestCase
   
   test "consider option name if given" do
     @test_product = TestProduct.new(:amount_field_price => "47.11")
-    form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+    form_for(@test_product, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price, :name => 'article')
     end
 
@@ -215,7 +217,7 @@ class FormHelperTest < ActionView::TestCase
 
   test "consider option id if given" do
     @test_product = TestProduct.new(:amount_field_price => "63.41")
-    form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+    form_for(@test_product, :builder => MyFormBuilder) do |f|
       concat f.amount_field(:price, :name => 'article', :id => 'my_id')
     end
 
@@ -239,7 +241,7 @@ class FormHelperTest < ActionView::TestCase
       @test_product = MyTestProduct.new(:amount_field_price => "-0,1")
       @test_product.valid?
 
-      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
@@ -257,7 +259,7 @@ class FormHelperTest < ActionView::TestCase
       @test_product = MyTestProduct.new(:amount_field_price => "12,34")
       @test_product.valid?
 
-      form_for(:test_product, @test_product, :builder => MyFormBuilder) do |f|
+      form_for(@test_product, :builder => MyFormBuilder) do |f|
         concat f.amount_field(:price)
       end
 
