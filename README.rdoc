@@ -149,13 +149,12 @@ You can define your own by adding your Yaml file to the load path like:
 
   # "#{RAILS_ROOT}/locale/en.yml"
   de:
-    activerecord:
-      errors:
-        messages:
-          invalid_amount_format: "bla ... '{{value}}' blub ...  ({{format_example}})"
+    errors:
+      messages:
+        invalid_amount_format: "'%{value}' ist ein ungültiges Format (%{format_example})"
     
-The placeholder <tt>{{value}}</tt> is substituted with the given value (e.g. "1.x") and 
-<tt>{{format_example}}</tt> with a valid example of the currently accepted format (e.g. 'd.ddd,dd').
+The placeholder <tt>%{value}</tt> is substituted with the given value (e.g. "1.x") and 
+<tt>%{format_example}</tt> with a valid example of the currently accepted format (e.g. 'd.ddd,dd').
 
 == How does it work?
 
