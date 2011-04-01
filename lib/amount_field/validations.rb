@@ -43,14 +43,11 @@ module AmountField #:nodoc:
               # consider the value still as invalid.
               record.send("#{attr_name}=", original_value)
               record.errors.add(attr_name, 
-                I18n.t('errors.messages.invalid_amount_format', {
+                build_error_message(configuration[:message], {
                   :value => original_value, 
-                  :format_example => valid_format_example(format_configuration(configuration))}
-                  ), 
-                # :value => original_value, 
-                # :default => configuration[:message], 
-                # :format_example => valid_format_example(format_configuration(configuration))
-                )
+                  :format_example => valid_format_example(format_configuration(configuration))
+                })
+              )
             end  
 
           end
@@ -117,6 +114,14 @@ module AmountField #:nodoc:
             s
           end
 
+          def build_error_message(explicit_message, options = {})
+            if explicit_message.blank?
+              I18n.t('errors.messages.invalid_amount_format', options)
+            else
+              I18n.interpolate(explicit_message, options)
+            end
+          end
+          
       end
       
     end
