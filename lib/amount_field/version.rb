@@ -1,3 +1,3 @@
-module Lorem
+module AmountField
   VERSION = "3.0.0"
 end

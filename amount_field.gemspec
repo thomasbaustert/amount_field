@@ -4,7 +4,7 @@ require "amount_field/version"
 
 Gem::Specification.new do |s|
   s.name        = "amount_field_rails3"
-  s.version     = Lorem::VERSION
+  s.version     = AmountField::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Thomas Baustert"]
   s.email       = ["business@thomasbaustert.de"]

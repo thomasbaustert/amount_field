@@ -4,7 +4,7 @@ module AmountField #:nodoc:
     #TODO/2010-04-23/tb remove redundant code
     # using @template.amount_field(object, method, options) !?
     
-    module FormHelper #:nodoc:
+    module FormHelper
 
       include ActionView::Helpers::NumberHelper
 
@@ -32,7 +32,7 @@ module AmountField #:nodoc:
 
     end
 
-    module FormBuilder #:nodoc:
+    module FormBuilder
 
       include ActionView::Helpers::NumberHelper
 

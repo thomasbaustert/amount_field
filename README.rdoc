@@ -4,11 +4,18 @@ Rails gem/plugin that accepts (amount) values in german or us format like 1.234,
 
 == Installation Rails 3
 
+Via Bundler:
+
+  # path/to/railsapp/Gemfile
+  gem 'amount_field_rails3', :require => 'amount_field'
+  
+  $ bundle install
+
 As Gem:
 
   $ gem sources -a http://gemcutter.org/ (you only have to do this once)
   $ sudo gem install amount_field_rails3
-
+  
 As plugin:
 
   $ rails plugin install git://github.com/thomasbaustert/amount_field.git
