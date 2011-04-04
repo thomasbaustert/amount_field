@@ -1,5 +1,6 @@
 # AmountField
 
+require 'amount_field/configuration'
 require 'amount_field/validations'
 require 'amount_field/form_helper'
 require 'amount_field/form_tag_helper'
