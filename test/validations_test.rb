@@ -50,8 +50,7 @@ class ValidationsTest < ActiveSupport::TestCase
       '1.234.567,89' => 1234567.89 
     }
   end
-  
-  
+                                  
   test "orignal setter accept ruby value if set via new" do
     product = TestProduct.new(:price => 12.34)
     assert_in_delta 12.34, product.price, 0.001
@@ -385,5 +384,16 @@ class ValidationsTest < ActiveSupport::TestCase
     assert p.errors.full_messages.include?("Price is not a number")
   end
 
+  test "configuration must not interfere with an active record model attribute" do
+    class TestProductWithAttributeConfiguration < ActiveRecord::Base
+      set_table_name 'test_products_with_configuration'
+      validates_amount_format_of :price
+    end
+    with_locale('de') do
+      #p = TestProductWithAttributeConfiguration.new(:amount_field_price => "1,23", :configuration => "TEXT")
+      assert TestProductWithAttributeConfiguration.new(:amount_field_price => "1,23").valid?
+    end
+  end
+  
 end
 

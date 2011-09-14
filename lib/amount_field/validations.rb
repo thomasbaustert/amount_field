@@ -2,8 +2,11 @@ module AmountField #:nodoc:
   module ActiveRecord #:nodoc: 
     module Validations
 
+      # Note: Don't use mattr_accessor here because it will define 'def configuration=' too which leads to error 
+      # "ActiveRecord::DangerousAttributeError:configuration=" in case the AR model has an attribute 'configuration'.
       @@configuration = {}
-      mattr_accessor :configuration
+      def self.configuration=(c); @@configuration = c; end
+      def self.configuration; @@configuration; end
 
       def self.included(base) # :nodoc:
         base.extend ClassMethods
@@ -15,7 +18,7 @@ module AmountField #:nodoc:
           # code before validates_each is called only once!
           configuration = attr_names.extract_options!
 
-          define_special_setter(attr_names, configuration)
+          define_special_setter(attr_names)
 
           # the following code defines the callbacks methods that are called on every validation
           validates_each(attr_names, configuration) do |record, attr_name, value|
@@ -55,7 +58,7 @@ module AmountField #:nodoc:
         
         private
 
-          def define_special_setter(attr_names, configuration)
+          def define_special_setter(attr_names)
             attr_names.each do |attr_name| 
               class_eval <<-EOV
                 def #{special_method_name(attr_name)}=(value)

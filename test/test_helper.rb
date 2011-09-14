@@ -21,6 +21,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.column "stock_price", :decimal, :precision => 12, :scale => 2
     t.column "float_price", :float
   end
+
+  create_table "test_products_with_configuration", :force => true do |t|    
+    t.column "configuration", :string
+    t.column "price", :decimal, :precision => 12, :scale => 2
+  end
 end
 
 class ActiveSupport::TestCase
