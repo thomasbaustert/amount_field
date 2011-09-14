@@ -390,8 +390,9 @@ class ValidationsTest < ActiveSupport::TestCase
       validates_amount_format_of :price
     end
     with_locale('de') do
-      #p = TestProductWithAttributeConfiguration.new(:amount_field_price => "1,23", :configuration => "TEXT")
-      assert TestProductWithAttributeConfiguration.new(:amount_field_price => "1,23").valid?
+      p = TestProductWithAttributeConfiguration.new(:amount_field_price => "1,23", :configuration => "TEXT")
+      assert p.valid?
+      assert_equal "TEXT", p.configuration
     end
   end
   
