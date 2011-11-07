@@ -1,3 +1,11 @@
+== 1.4.3 2011-11-07
+
+* require configurtion.rb to avoid uninitialized constant AmountField::Configuration
+
+== 1.4.2 2010-05-11
+          
+* Don't set default dom Id for FormBuilder amount_field, use Rails default or use given one.
+
 == 1.4.1 2010-05-11
 
 * Don't set default dom Id for FormBuilder amount_field, use Rails default or use given one.
