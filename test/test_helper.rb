@@ -10,7 +10,7 @@ ActiveRecord::Base.establish_connection({
   :database => 'gem_amount_field_test',
   :host     => 'localhost',
   :username => 'root',
-  :password => '' 
+  :password => 'root' 
 })
 
 ActiveRecord::Migration.verbose = false
