@@ -207,7 +207,7 @@ class ValidationsTest < ActiveSupport::TestCase
   test "validates_amount_format_of use given message" do
     class TestProductGivenMessage < ActiveRecord::Base
       set_table_name 'test_products'
-      validates_amount_format_of :price, :message => "special message {{value}}"
+      validates_amount_format_of :price, :message => "special message %{value}"
     end
 
     product = TestProductGivenMessage.new(:amount_field_price => 'x')
